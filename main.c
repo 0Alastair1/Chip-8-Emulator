@@ -129,26 +129,8 @@ void cpuLoop(Uint8* data, uint32_t size)
         printf("%04x %04x\n", opcode.opcode, PC);
         
         //decode and execute opcode
-        if(opcode.opcode == 0x00E0)
-        {
-            //todo later
 
-        }
-
-        if(opcode.opcode == 0x00EE)
-        {
-            //todo later
-
-        }
-
-        //0x00CN - superchip 8 instruction
-        if( ((opcode.opcode >> 4) << 4) == 0x00C0 && chip8SuperMode)
-        {
-            //todo later
-
-        }
-
-        /* superchip 8 instructions */
+        /* superchip 8 instructions block */
         if(chip8SuperMode)
         {
             //0x00FB
@@ -186,10 +168,29 @@ void cpuLoop(Uint8* data, uint32_t size)
 
             }
         }
-         /* end superchip 8 instructions */
+         /* end superchip 8 instructions block */
+
+        else if(opcode.opcode == 0x00E0)
+        {
+            //todo later
+
+        }
+
+        else if(opcode.opcode == 0x00EE)
+        {
+            //todo later
+
+        }
+
+        //0x00CN - superchip 8 instruction
+        else if( ((opcode.opcode >> 4) << 4) == 0x00C0 && chip8SuperMode)
+        {
+            //todo later
+
+        }
 
         //0NNN
-        if(opcode.opcode >> 12 == 0x0)
+        else if(opcode.opcode >> 12 == 0x0)
         {
             //todo later
 
