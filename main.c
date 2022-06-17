@@ -31,20 +31,34 @@
 #include <time.h>
 #include <string.h>
 
-uint8_t Width = 128;
-uint8_t Height = 64;
+#define Uint8 uint8_t
+#define Uint16 uint16_t
+#define Uint32 uint32_t
+#define Uint64 uint64_t
+
+bool isLittleEndian()
+{
+    Uint16 val = 0xFF00;
+    return *(Uint8*)&val == 0xFF;
+}
+
+bool chip8SuperMode();
+
+Uint8 Width = 128;
+Uint8 Height = 64;
 
 
 struct file{
-    uint8_t* data;
+    Uint8* data;
     uint32_t size;
 };
 
 //https://en.wikipedia.org/wiki/CHIP-8
 //http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 //https://tobiasvl.github.io/blog/write-a-chip-8-emulator
+//http://johnearnest.github.io/Octo/docs/SuperChip.html
 
-void cpuLoop(uint8_t*, uint32_t);
+void cpuLoop(Uint8*, uint32_t);
 char* openFile();
 struct file readFile(char*);
 
@@ -56,16 +70,16 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-void cpuLoop(uint8_t* data, uint32_t size)
+void cpuLoop(Uint8* data, uint32_t size)
 {
-    uint8_t PC;
-    uint8_t SP;
-    uint8_t i;
-    uint8_t* memory = alloca(4096);
-    uint8_t v[16];
-    uint16_t stack[16];
-    uint8_t delayTimer;
-    uint8_t soundTimer;
+    Uint8 PC;
+    Uint8 SP;
+    Uint8 i;
+    Uint8* memory = alloca(4096);
+    Uint8 v[16];
+    Uint16 stack[16];
+    Uint8 delayTimer;
+    Uint8 soundTimer;
 
     //copy file data to memory
     memcpy(memory, data, size);
@@ -85,30 +99,361 @@ void cpuLoop(uint8_t* data, uint32_t size)
     #pragma push();
     #pragma pack(1)
     union{
-        uint16_t opcode;
+        Uint16 opcode;
         struct PACKED{
-            uint8_t two:2;
-            uint8_t four:2;
-            uint8_t six:2;
-            uint8_t eight:2;
-            uint8_t ten:2;
-            uint8_t twelve:2;
-            uint8_t forteen:2;
-            uint8_t sixteen:2;
-        };
+            Uint8 two:2;
+            Uint8 four:2;
+            Uint8 six:2;
+            Uint8 eight:2;
+            Uint8 ten:2;
+            Uint8 twelve:2;
+            Uint8 forteen:2;
+            Uint8 sixteen:2;
+        }bits;
     } opcode;
     #pragma pop();
 
     //cpu loop
     while (true)
     {
-        opcode.opcode = memory[PC] << 8 | memory[PC + 1];
+        if(isLittleEndian)
+        {
+            opcode.opcode = memory[PC] << 8 | memory[PC + 1];
+        }
+        else
+        {
+            opcode.opcode = *(Uint16*)&memory[PC];
+        }
+
         printf("%04x %04x\n", opcode.opcode, PC);
         
 
-        //if()
+        if(opcode.opcode == 0x00E0)
+        {
+            //todo later
 
+        }
 
+        if(opcode.opcode == 0x00EE)
+        {
+            //todo later
+
+        }
+
+        //0x00CN - superchip 8 instruction
+        if( ((opcode.opcode >> 4) << 4) == 0x00C0 && chip8SuperMode)
+        {
+            //todo later
+
+        }
+
+        
+
+        /* superchip 8 instructions */
+        if(chip8SuperMode)
+        {
+            //0x00FB
+            if(opcode.opcode == 0x00FB)
+            {
+                //todo later
+
+            }
+            
+            //0x00FC
+            if(opcode.opcode == 0x00FC)
+            {
+                //todo later
+
+            }
+
+            //0x00FD
+            if(opcode.opcode == 0x00FD)
+            {
+                //todo later
+
+            }
+
+            //0x00FE
+            if(opcode.opcode == 0x00FE)
+            {
+                //todo later
+
+            }
+
+            //0x00FF
+            if(opcode.opcode == 0x00FF)
+            {
+                //todo later
+
+            }
+        }
+         /* end superchip 8 instructions */
+
+        //0NNN
+        if(opcode.bits.two == 0 && opcode.bits.four == 1)
+        {
+
+            //todo later
+
+        }
+
+        //1NNN
+        else if(opcode.bits.two == 0 && opcode.bits.four == 1)
+        {
+            //todo later
+
+        }
+
+        //2NNN
+        else if(opcode.bits.two == 0 && opcode.bits.four == 2)
+        {
+            //todo later
+
+        }
+
+        //3XNN
+        else if(opcode.bits.two == 0 && opcode.bits.four == 3)
+        {
+            //todo later
+
+        }
+        
+        //4XNN
+        if(opcode.bits.two == 1 && opcode.bits.four == 0)
+        {
+            //todo later
+
+        }
+
+        //5XY0
+        else if(opcode.bits.two == 1 && opcode.bits.four == 1 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0)
+        {
+            //todo later
+
+        }
+        
+        //6XNN
+        else if(opcode.bits.two == 1 && opcode.bits.four == 2)
+        {
+            //todo later
+
+        }
+
+        //7XNN
+        else if(opcode.bits.two == 1 && opcode.bits.four == 3)
+        {
+            //todo later
+
+        }
+
+        //8XY0
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0)
+        {
+            //todo later
+
+        }
+
+        //8XY1
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 1)
+        {
+            //todo later
+
+        }
+
+        //8XY2
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 2)
+        {
+            //todo later
+
+        }
+
+        //8XY3
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 3)
+        {
+            //todo later
+
+        }
+
+        //8XY4
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 0)
+        {
+            //todo later
+
+        }
+
+        //8XY5
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        {
+            //todo later
+
+        }
+
+        //8XY6
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 2)
+        {
+            //todo later
+
+        }
+
+        //8XY7
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 3)
+        {
+            //todo later
+
+        }
+
+        //8XYE
+        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 3 && opcode.bits.sixteen == 2)
+        {
+            //todo later
+
+        }
+
+        //9XY0
+        else if(opcode.bits.two == 2 && opcode.bits.four == 1 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0)
+        {
+            //todo later
+
+        }
+
+        //ANNN
+        else if(opcode.bits.two == 2 && opcode.bits.four == 2)
+        {
+            //todo later
+
+        }
+
+        //BNNN
+        else if(opcode.bits.two == 2 && opcode.bits.four == 3)
+        {
+            //todo later
+
+        }
+
+        //CXNN
+        else if(opcode.bits.two == 3 && opcode.bits.four == 0)
+        {
+            //todo later
+
+        }
+
+        //DXYN
+        else if(opcode.bits.two == 3 && opcode.bits.four == 1)
+        {
+
+            //0xDXY0 - superchip 8 instruction
+            if(opcode.bits.forteen == 0 && opcode.bits.sixteen == 0 && chip8SuperMode)
+            {
+                //todo later
+
+            }
+
+            //todo later
+
+        }
+
+        //EX9E
+        else if(opcode.bits.two == 3 && opcode.bits.four == 2 && opcode.bits.ten == 2 && opcode.bits.twelve == 1 && opcode.bits.forteen == 3 && opcode.bits.sixteen == 2)
+        {
+            //todo later
+
+        }
+
+        //EXA1
+        else if(opcode.bits.two == 3 && opcode.bits.four == 2 && opcode.bits.ten == 2 && opcode.bits.twelve == 2 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 1)
+        {
+            //todo later
+
+        }
+
+        //FX07
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 3)
+        {
+            //todo later
+
+        }
+
+        //FX0A
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 0 && opcode.bits.forteen == 2 && opcode.bits.sixteen == 2)
+        {
+            //todo later
+
+        }
+
+        //FX15
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 1 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        {
+            //todo later
+
+        }
+
+        //FX18
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 1 && opcode.bits.forteen == 2 && opcode.bits.sixteen == 0)
+        {
+            //todo later
+
+        }
+
+        //FX1E
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 1 && opcode.bits.forteen == 3 && opcode.bits.sixteen == 2)
+        {
+            //todo later
+
+        }
+
+        //FX29
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 2 && opcode.bits.forteen == 2 && opcode.bits.sixteen == 1)
+        {
+            //todo later
+
+        }
+
+        //FX30 - superchip 8 instruction
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 3 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0 && chip8SuperMode)
+        {
+            //todo later
+
+        }
+
+        //FX33
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 3 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 3)
+        {
+            //todo later
+
+        }
+
+        //FX55
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 1 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        {
+            //todo later
+
+        }
+
+        //FX65
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 2 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        {
+            //todo later
+
+        }
+
+        //FX75 - superchip 8 instruction
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 3 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1 && chip8SuperMode)
+        {
+            //todo later
+
+        }
+
+        //FX85 - superchip 8 instruction
+        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 3 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 2 && chip8SuperMode)
+        {
+            //todo later
+
+        }
+
+        else
+        {
+            printf("Unhandled opcode: %X\n At address: %X\n", opcode.opcode, PC);
+        }
     }
 
     return;
@@ -167,7 +512,7 @@ struct file readFile(char* filepath)
     fseek(fp, 0, SEEK_END);
     file.size = ftell(fp);
 
-    uint8_t* fileContent = malloc(file.size) + 1;
+    Uint8* fileContent = malloc(file.size) + 1;
 
     fseek(fp, 0, SEEK_SET);
     fread(fileContent, 1, file.size, fp);
