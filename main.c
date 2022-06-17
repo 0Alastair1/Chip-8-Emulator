@@ -31,9 +31,26 @@
 #include <time.h>
 #include <string.h>
 
+
 uint8_t Width = 128;
 uint8_t Height = 64;
 
+#pragma push();
+    #pragma pack(1)
+    union{
+        uint16_t opcode;
+        struct PACKED{
+            uint8_t two:2;
+            uint8_t four:2;
+            uint8_t six:2;
+            uint8_t eight:2;
+            uint8_t ten:2;
+            uint8_t twelve:2;
+            uint8_t forteen:2;
+            uint8_t sixteen:2;
+        };
+    } opcode;
+#pragma pop();
 
 struct file{
     uint8_t* data;
@@ -82,28 +99,12 @@ void cpuLoop(uint8_t* data, uint32_t size)
     delayTimer = 0;
     soundTimer = 0;
 
-    #pragma push();
-    #pragma pack(1)
-    union{
-        uint16_t opcode;
-        struct PACKED{
-            uint8_t two:2;
-            uint8_t four:2;
-            uint8_t six:2;
-            uint8_t eight:2;
-            uint8_t ten:2;
-            uint8_t twelve:2;
-            uint8_t forteen:2;
-            uint8_t sixteen:2;
-        };
-    }s;
-    #pragma pop();
 
     //cpu loop
     while (true)
     {
-        s.opcode = memory[PC] << 8 | memory[PC + 1];
-        printf("%04x %04x\n", s.opcode, PC);
+        opcode.opcode = memory[PC] << 8 | memory[PC + 1];
+        printf("%04x %04x\n", opcode.opcode, PC);
         
 
         //if()
