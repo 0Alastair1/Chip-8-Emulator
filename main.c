@@ -73,11 +73,11 @@ int main(int argc, char const *argv[])
 
 void cpuLoop(Uint8* data, uint32_t size)
 {
-    Uint8 PC;
+    Uint16 PC;
     Uint8 SP;
     Uint8 i;
     Uint8* memory = alloca(4096);
-    Uint8 v[16];
+    Uint8 V[16];
     Uint16 stack[16];
     Uint8 delayTimer;
     Uint8 soundTimer;
@@ -91,12 +91,13 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     for(i = 0; i < 16; i++)
     {
-        v[i] = 0;
+        V[i] = 0;
         stack[i] = 0;
     }
     delayTimer = 0;
     soundTimer = 0;
 
+    /*
     #pragma push();
     #pragma pack(1)
     union{
@@ -113,6 +114,9 @@ void cpuLoop(Uint8* data, uint32_t size)
         }bits;
     } opcode;
     #pragma pop();
+    */
+
+    Uint16 opcode;
 
     //cpu loop
     while (true)
@@ -120,14 +124,14 @@ void cpuLoop(Uint8* data, uint32_t size)
         //fetch opcode
         if(isLittleEndian)
         {
-            opcode.opcode = memory[PC] << 8 | memory[PC + 1];
+            opcode = memory[PC] << 8 | memory[PC + 1];
         }
         else
         {
-            opcode.opcode = *(Uint16*)&memory[PC];
+            opcode = *(Uint16*)&memory[PC];
         }
 
-        printf("%04x %04x\n", opcode.opcode, PC);
+        printf("%04x %04x\n", opcode, PC);
         
         //decode and execute opcode
 
@@ -135,35 +139,35 @@ void cpuLoop(Uint8* data, uint32_t size)
         if(chip8SuperMode)
         {
             //0x00FB
-            if(opcode.opcode == 0x00FB)
+            if(opcode == 0x00FB)
             {
                 //todo later
 
             }
             
             //0x00FC
-            if(opcode.opcode == 0x00FC)
+            if(opcode == 0x00FC)
             {
                 //todo later
 
             }
 
             //0x00FD
-            if(opcode.opcode == 0x00FD)
+            if(opcode == 0x00FD)
             {
                 //todo later
 
             }
 
             //0x00FE
-            if(opcode.opcode == 0x00FE)
+            if(opcode == 0x00FE)
             {
                 //todo later
 
             }
 
             //0x00FF
-            if(opcode.opcode == 0x00FF)
+            if(opcode == 0x00FF)
             {
                 //todo later
 
@@ -172,180 +176,186 @@ void cpuLoop(Uint8* data, uint32_t size)
          /* end superchip 8 instructions block */
 
         //0x00E0
-        else if(opcode.opcode == 0x00E0)
+        else if(opcode == 0x00E0)
         {
             //todo later
 
         }
 
         //0x00EE
-        else if(opcode.opcode == 0x00EE)
+        else if(opcode == 0x00EE)
         {
             PC = stack[SP];
             SP--;
-            break;
 
         }
 
         //0x00CN - superchip 8 instruction
-        else if( ((opcode.opcode >> 4) << 4) == 0x00C0 && chip8SuperMode)
+        else if( ((opcode >> 4) << 4) == 0x00C0 && chip8SuperMode)
         {
             //todo later
 
         }
 
-        //0NNN
-        else if(opcode.opcode >> 12 == 0x0)
+        //0NNN - checkme
+        else if(opcode >> 12 == 0x0)
         {
-            PC += 2;
+            PC += 1;
+            
             PC = memory[PC];
-            break;
 
         }
 
         //1NNN
-        else if(opcode.opcode >> 12 == 0x1)
+        else if(opcode >> 12 == 0x1)
         {
-            //todo later
-
+            PC = opcode & 0x0FFF;
         }
 
         //2NNN
-        else if(opcode.opcode >> 12 == 0x2)
+        else if(opcode >> 12 == 0x2)
         {
-            //todo later
-
+            SP += 1;
+            stack[SP] = PC;
+            PC = opcode & 0x0FFF;
         }
 
-        //3XNN
-        else if(opcode.opcode >> 12 == 0x3)
+        //3XKK
+        else if(opcode >> 12 == 0x3)
         {
-            //todo later
+            PC += 1;
 
+            if(V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
+            {
+                PC += 1;
+            }
         }
 
-        
-        //4XNN
-        else if(opcode.opcode >> 12 == 0x4)
+        //4XKK
+        else if(opcode >> 12 == 0x4)
         {
-            //todo later
+            PC += 1;
 
+            if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+            {
+                PC += 1;
+            }
         }
 
         //5XY0
-        else if(opcode.opcode >> 12 == 0x5 && (opcode.opcode & 0x000F) == 0x0)
+        else if(opcode >> 12 == 0x5 && (opcode & 0x000F) == 0x0)
         {
             //todo later
 
         }
         
         //6XNN
-        else if(opcode.opcode >> 12 == 0x6)
+        else if(opcode >> 12 == 0x6)
         {
             //todo later
 
         }
 
         //7XNN
-        else if(opcode.opcode >> 12 == 0x7)
+        else if(opcode >> 12 == 0x7)
         {
             //todo later
 
         }
 
         //8XY0
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x0)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x0)
         {
             //todo later
 
         }
 
         //8XY1
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x1)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x1)
         {
             //todo later
 
         }
 
         //8XY2
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x2)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x2)
         {
             //todo later
 
         }
 
         //8XY3
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x3)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x3)
         {
             //todo later
 
         }
 
         //8XY4
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x4)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x4)
         {
             //todo later
 
         }
 
         //8XY5
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x5)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x5)
         {
             //todo later
 
         }
 
         //8XY6
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x6)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x6)
         {
             //todo later
 
         }
 
         //8XY7
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x7)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x7)
         {
             //todo later
 
         }
 
         //8XYE
-        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0xE)
+        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0xE)
         {
             //todo later
 
         }
         
         //9XY0
-        else if(opcode.opcode >> 12 == 0x9 && (opcode.opcode & 0x000F) == 0x0)
+        else if(opcode >> 12 == 0x9 && (opcode & 0x000F) == 0x0)
         {
             //todo later
 
         }
 
         //ANNN
-        else if(opcode.opcode >> 12 == 0xA)
+        else if(opcode >> 12 == 0xA)
         {
             //todo later
 
         }
 
         //BNNN
-        else if(opcode.opcode >> 12 == 0xB)
+        else if(opcode >> 12 == 0xB)
         {
             //todo later
 
         }
 
         //CXNN
-        else if(opcode.opcode >> 12 == 0xC)
+        else if(opcode >> 12 == 0xC)
         {
             //todo later
 
         }
 
         //0xDXY0 - superchip 8 instruction
-        else if(opcode.opcode >> 12 == 0xD && (opcode.opcode & 0x000F) == 0x0 && chip8SuperMode)
+        else if(opcode >> 12 == 0xD && (opcode & 0x000F) == 0x0 && chip8SuperMode)
         {
             //todo later
 
@@ -353,105 +363,105 @@ void cpuLoop(Uint8* data, uint32_t size)
 
 
         //DXYN
-        else if(opcode.opcode >> 12 == 0xD)
+        else if(opcode >> 12 == 0xD)
         {
             //todo later
 
         }
 
         //EX9E
-        else if(opcode.opcode >> 12 == 0xE && (opcode.opcode & 0x00FF) == 0x9E)
+        else if(opcode >> 12 == 0xE && (opcode & 0x00FF) == 0x9E)
         {
             //todo later
 
         }
 
         //EXA1
-        else if(opcode.opcode >> 12 == 0xE && (opcode.opcode & 0x00FF) == 0xA1)
+        else if(opcode >> 12 == 0xE && (opcode & 0x00FF) == 0xA1)
         {
             //todo later
 
         }
 
         //FX07
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x07)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x07)
         {
             //todo later
 
         }
 
         //FX0A
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x0A)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x0A)
         {
             //todo later
 
         }
 
         //FX15
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x15)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x15)
         {
             //todo later
 
         }
 
         //FX18
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x18)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x18)
         {
             //todo later
 
         }
 
         //FX1E
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x1E)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x1E)
         {
             //todo later
 
         }
 
         //FX29
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x29)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x29)
         {
             //todo later
 
         }
 
         //FX30 - superchip 8 instruction
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x30 && chip8SuperMode)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x30 && chip8SuperMode)
         {
             //todo later
 
         }
 
         //FX33
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x33)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x33)
         {
             //todo later
 
         }
 
         //FX55
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x55)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x55)
         {
             //todo later
 
         }
 
         //FX65
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x65)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x65)
         {
             //todo later
 
         }
 
         //FX75 - superchip 8 instruction
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x75 && chip8SuperMode)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x75 && chip8SuperMode)
         {
             //todo later
 
         }
 
         //FX85 - superchip 8 instruction
-        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x85 && chip8SuperMode)
+        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x85 && chip8SuperMode)
         {
             //todo later
 
@@ -459,7 +469,7 @@ void cpuLoop(Uint8* data, uint32_t size)
 
         else
         {
-            printf("Unhandled opcode: %X\n At address: %X\n", opcode.opcode, PC);
+            printf("Unhandled opcode: %X\n At address: %X\n", opcode, PC);
         }
     }
 
