@@ -16,6 +16,13 @@
 
 #endif
 
+#if defined(__GNUC__)
+    #define PACKED( __Declaration__) __Declaration__ __attribute__((__packed__))
+
+#elif defined(_MSC_VER)
+    #define PACKED( __Declaration__) __pragma( pack(push, 1)) __Declaration__ __pragma(pack(pop))
+#endif
+
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -75,39 +82,31 @@ void cpuLoop(uint8_t* data, uint32_t size)
     delayTimer = 0;
     soundTimer = 0;
 
+    #pragma push();
+    #pragma pack(1)
+    union{
+        uint16_t opcode;
+        struct PACKED{
+            uint8_t two:2;
+            uint8_t four:2;
+            uint8_t six:2;
+            uint8_t eight:2;
+            uint8_t ten:2;
+            uint8_t twelve:2;
+            uint8_t forteen:2;
+            uint8_t sixteen:2;
+        };
+    }s;
+    #pragma pop();
+
     //cpu loop
     while (true)
     {
-        uint16_t opcode = memory[PC] << 8 | memory[PC + 1];
-        printf("%04x %04x\n", opcode, PC);
-        switch(opcode)
-        {
-            case 0x0000:
-                PC += 2;
-                break;
+        s.opcode = memory[PC] << 8 | memory[PC + 1];
+        printf("%04x %04x\n", s.opcode, PC);
+        
 
-            
-
-
-           case 0x00E0:
-                //todo later
-
-                PC += 2;
-                break;
-
-            case 0x00EE:
-                PC = stack[SP];
-                SP--;
-                break;
-
-
-
-
-            default:
-                PC += 2;
-                break;
-
-        }
+        //if()
 
 
     }
