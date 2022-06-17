@@ -51,8 +51,9 @@ int main(int argc, char const *argv[])
 
 void cpuLoop(uint8_t* data, uint32_t size)
 {
-    uint16_t PC;
-    uint16_t i;
+    uint8_t PC;
+    uint8_t SP;
+    uint8_t i;
     uint8_t* memory = alloca(4096);
     uint8_t v[16];
     uint16_t stack[16];
@@ -64,6 +65,7 @@ void cpuLoop(uint8_t* data, uint32_t size)
 
     //starting at 0x00
     PC = 0x00;
+    SP = 0x00;
 
     for(i = 0; i < 16; i++)
     {
@@ -73,9 +75,40 @@ void cpuLoop(uint8_t* data, uint32_t size)
     delayTimer = 0;
     soundTimer = 0;
 
+    //cpu loop
     while (true)
     {
-        
+        uint16_t opcode = memory[PC] << 8 | memory[PC + 1];
+        printf("%04x %04x\n", opcode, PC);
+        switch(opcode)
+        {
+            case 0x0000:
+                PC += 2;
+                break;
+
+            
+
+
+           case 0x00E0:
+                //todo later
+
+                PC += 2;
+                break;
+
+            case 0x00EE:
+                PC = stack[SP];
+                SP--;
+                break;
+
+
+
+
+            default:
+                PC += 2;
+                break;
+
+        }
+
 
     }
 
