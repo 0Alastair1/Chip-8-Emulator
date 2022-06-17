@@ -116,6 +116,7 @@ void cpuLoop(Uint8* data, uint32_t size)
     //cpu loop
     while (true)
     {
+        //fetch opcode
         if(isLittleEndian)
         {
             opcode.opcode = memory[PC] << 8 | memory[PC + 1];
@@ -127,7 +128,7 @@ void cpuLoop(Uint8* data, uint32_t size)
 
         printf("%04x %04x\n", opcode.opcode, PC);
         
-
+        //decode and execute opcode
         if(opcode.opcode == 0x00E0)
         {
             //todo later
@@ -146,8 +147,6 @@ void cpuLoop(Uint8* data, uint32_t size)
             //todo later
 
         }
-
-        
 
         /* superchip 8 instructions */
         if(chip8SuperMode)
@@ -190,261 +189,261 @@ void cpuLoop(Uint8* data, uint32_t size)
          /* end superchip 8 instructions */
 
         //0NNN
-        if(opcode.bits.two == 0 && opcode.bits.four == 1)
+        if(opcode.opcode >> 12 == 0x0)
         {
-
             //todo later
 
         }
 
         //1NNN
-        else if(opcode.bits.two == 0 && opcode.bits.four == 1)
+        else if(opcode.opcode >> 12 == 0x1)
         {
             //todo later
 
         }
 
         //2NNN
-        else if(opcode.bits.two == 0 && opcode.bits.four == 2)
+        else if(opcode.opcode >> 12 == 0x2)
         {
             //todo later
 
         }
 
         //3XNN
-        else if(opcode.bits.two == 0 && opcode.bits.four == 3)
+        else if(opcode.opcode >> 12 == 0x3)
         {
             //todo later
 
         }
+
         
         //4XNN
-        if(opcode.bits.two == 1 && opcode.bits.four == 0)
+        else if(opcode.opcode >> 12 == 0x4)
         {
             //todo later
 
         }
 
         //5XY0
-        else if(opcode.bits.two == 1 && opcode.bits.four == 1 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0)
+        else if(opcode.opcode >> 12 == 0x5 && (opcode.opcode & 0x000F) == 0x0)
         {
             //todo later
 
         }
         
         //6XNN
-        else if(opcode.bits.two == 1 && opcode.bits.four == 2)
+        else if(opcode.opcode >> 12 == 0x6)
         {
             //todo later
 
         }
 
         //7XNN
-        else if(opcode.bits.two == 1 && opcode.bits.four == 3)
+        else if(opcode.opcode >> 12 == 0x7)
         {
             //todo later
 
         }
 
         //8XY0
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x0)
         {
             //todo later
 
         }
 
         //8XY1
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 1)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x1)
         {
             //todo later
 
         }
 
         //8XY2
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 2)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x2)
         {
             //todo later
 
         }
 
         //8XY3
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 3)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x3)
         {
             //todo later
 
         }
 
         //8XY4
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 0)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x4)
         {
             //todo later
 
         }
 
         //8XY5
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x5)
         {
             //todo later
 
         }
 
         //8XY6
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 2)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x6)
         {
             //todo later
 
         }
 
         //8XY7
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 3)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0x7)
         {
             //todo later
 
         }
 
         //8XYE
-        else if(opcode.bits.two == 2 && opcode.bits.four == 0 && opcode.bits.forteen == 3 && opcode.bits.sixteen == 2)
+        else if(opcode.opcode >> 12 == 0x8 && (opcode.opcode & 0x000F) == 0xE)
         {
             //todo later
 
         }
-
+        
         //9XY0
-        else if(opcode.bits.two == 2 && opcode.bits.four == 1 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0)
+        else if(opcode.opcode >> 12 == 0x9 && (opcode.opcode & 0x000F) == 0x0)
         {
             //todo later
 
         }
 
         //ANNN
-        else if(opcode.bits.two == 2 && opcode.bits.four == 2)
+        else if(opcode.opcode >> 12 == 0xA)
         {
             //todo later
 
         }
 
         //BNNN
-        else if(opcode.bits.two == 2 && opcode.bits.four == 3)
+        else if(opcode.opcode >> 12 == 0xB)
         {
             //todo later
 
         }
 
         //CXNN
-        else if(opcode.bits.two == 3 && opcode.bits.four == 0)
+        else if(opcode.opcode >> 12 == 0xC)
         {
             //todo later
 
         }
 
-        //DXYN
-        else if(opcode.bits.two == 3 && opcode.bits.four == 1)
+        //0xDXY0 - superchip 8 instruction
+        else if(opcode.opcode >> 12 == 0xD && (opcode.opcode & 0x000F) == 0x0 && chip8SuperMode)
         {
+            //todo later
 
-            //0xDXY0 - superchip 8 instruction
-            if(opcode.bits.forteen == 0 && opcode.bits.sixteen == 0 && chip8SuperMode)
-            {
-                //todo later
+        }
 
-            }
 
+        //DXYN
+        else if(opcode.opcode >> 12 == 0xD)
+        {
             //todo later
 
         }
 
         //EX9E
-        else if(opcode.bits.two == 3 && opcode.bits.four == 2 && opcode.bits.ten == 2 && opcode.bits.twelve == 1 && opcode.bits.forteen == 3 && opcode.bits.sixteen == 2)
+        else if(opcode.opcode >> 12 == 0xE && (opcode.opcode & 0x00FF) == 0x9E)
         {
             //todo later
 
         }
 
         //EXA1
-        else if(opcode.bits.two == 3 && opcode.bits.four == 2 && opcode.bits.ten == 2 && opcode.bits.twelve == 2 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 1)
+        else if(opcode.opcode >> 12 == 0xE && (opcode.opcode & 0x00FF) == 0xA1)
         {
             //todo later
 
         }
 
         //FX07
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 0 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 3)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x07)
         {
             //todo later
 
         }
 
         //FX0A
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 0 && opcode.bits.forteen == 2 && opcode.bits.sixteen == 2)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x0A)
         {
             //todo later
 
         }
 
         //FX15
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 1 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x15)
         {
             //todo later
 
         }
 
         //FX18
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 1 && opcode.bits.forteen == 2 && opcode.bits.sixteen == 0)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x18)
         {
             //todo later
 
         }
 
         //FX1E
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 1 && opcode.bits.forteen == 3 && opcode.bits.sixteen == 2)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x1E)
         {
             //todo later
 
         }
 
         //FX29
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 2 && opcode.bits.forteen == 2 && opcode.bits.sixteen == 1)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x29)
         {
             //todo later
 
         }
 
         //FX30 - superchip 8 instruction
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 3 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 0 && chip8SuperMode)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x30 && chip8SuperMode)
         {
             //todo later
 
         }
 
         //FX33
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 0 && opcode.bits.twelve == 3 && opcode.bits.forteen == 0 && opcode.bits.sixteen == 3)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x33)
         {
             //todo later
 
         }
 
         //FX55
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 1 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x55)
         {
             //todo later
 
         }
 
         //FX65
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 2 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x65)
         {
             //todo later
 
         }
 
         //FX75 - superchip 8 instruction
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 3 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 1 && chip8SuperMode)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x75 && chip8SuperMode)
         {
             //todo later
 
         }
 
         //FX85 - superchip 8 instruction
-        else if(opcode.bits.two == 3 && opcode.bits.four == 3 && opcode.bits.ten == 1 && opcode.bits.twelve == 3 && opcode.bits.forteen == 1 && opcode.bits.sixteen == 2 && chip8SuperMode)
+        else if(opcode.opcode >> 12 == 0xF && (opcode.opcode & 0x00FF) == 0x85 && chip8SuperMode)
         {
             //todo later
 
