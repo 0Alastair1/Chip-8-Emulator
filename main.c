@@ -36,7 +36,7 @@
 #define Uint32 uint32_t
 #define Uint64 uint64_t
 
-bool isLittleEndian()
+inline bool isLittleEndian()
 {
     Uint16 val = 0xFF00;
     return *(Uint8*)&val == 0xFF;
@@ -52,6 +52,7 @@ struct file{
     Uint8* data;
     uint32_t size;
 };
+
 
 //https://en.wikipedia.org/wiki/CHIP-8
 //http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
@@ -170,15 +171,19 @@ void cpuLoop(Uint8* data, uint32_t size)
         }
          /* end superchip 8 instructions block */
 
+        //0x00E0
         else if(opcode.opcode == 0x00E0)
         {
             //todo later
 
         }
 
+        //0x00EE
         else if(opcode.opcode == 0x00EE)
         {
-            //todo later
+            PC = stack[SP];
+            SP--;
+            break;
 
         }
 
@@ -192,7 +197,9 @@ void cpuLoop(Uint8* data, uint32_t size)
         //0NNN
         else if(opcode.opcode >> 12 == 0x0)
         {
-            //todo later
+            PC += 2;
+            PC = memory[PC];
+            break;
 
         }
 
