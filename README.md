@@ -1,6 +1,6 @@
-# Chip-8 Emulator  
+# Chip-8 Emulator  (WIP)
  
-A chip-8 and superchip emulator.  
+A chip-8 and superchip emulator in C.  
 
 ## Building (Linux and Windows):  
 
