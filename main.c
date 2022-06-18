@@ -36,6 +36,18 @@
 #define Uint32 uint32_t
 #define Uint64 uint64_t
 
+#define x (opcode & 0x0F00)
+#define y (opcode & 0x00F0)
+#define n (opcode & 0x000F)
+#define kk (opcode & 0x00FF)
+#define nnn (opcode & 0x0FFF)
+#define numFirst (opcode & 0xF000)
+#define numSecond x
+#define numThird y
+#define numLast n
+#define byteFirst (opcode & 0xFF00)
+#define byteLast kk
+
 inline bool isLittleEndian()
 {
     Uint16 val = 0xFF00;
@@ -191,14 +203,15 @@ void cpuLoop(Uint8* data, uint32_t size)
         }
 
         //0x00CN - superchip 8 instruction
-        else if( ((opcode >> 4) << 4) == 0x00C0 && chip8SuperMode)
+        else if(byteFirst == 0x00 && numThird == 0xC)
         {
             //todo later
 
         }
 
+
         //0NNN - checkme
-        else if(opcode >> 12 == 0x0)
+        else if(numFirst == 0x0)
         {
             PC += 1;
             
@@ -207,155 +220,166 @@ void cpuLoop(Uint8* data, uint32_t size)
         }
 
         //1NNN
-        else if(opcode >> 12 == 0x1)
+        else if(numFirst == 0x1)
         {
-            PC = opcode & 0x0FFF;
+            PC = nnn;
         }
 
         //2NNN
-        else if(opcode >> 12 == 0x2)
+        else if(numFirst == 0x2)
         {
             SP += 1;
             stack[SP] = PC;
-            PC = opcode & 0x0FFF;
+            PC = nnn;
         }
 
         //3XKK
-        else if(opcode >> 12 == 0x3)
+        else if(numFirst == 0x3)
         {
             PC += 1;
 
-            if(V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
+            if(V[x] == kk)
             {
                 PC += 1;
             }
         }
 
         //4XKK
-        else if(opcode >> 12 == 0x4)
+        else if(numFirst == 0x4)
         {
             PC += 1;
 
-            if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+            if(V[x] != kk)
             {
                 PC += 1;
             }
         }
 
         //5XY0
-        else if(opcode >> 12 == 0x5 && (opcode & 0x000F) == 0x0)
+        else if(numFirst == 0x5 && numLast == 0x0)
         {
-            //todo later
+            PC += 1;
+
+            if(V[x] == V[y])
+            {
+                PC += 1;
+            }
 
         }
         
         //6XNN
-        else if(opcode >> 12 == 0x6)
+        else if(numFirst == 0x6)
         {
-            //todo later
+            PC += 1;
+
+            V[x] = kk;
 
         }
 
         //7XNN
-        else if(opcode >> 12 == 0x7)
+        else if(numFirst == 0x7)
         {
-            //todo later
+            PC += 1;
 
+            V[x] += kk;
         }
 
         //8XY0
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x0)
+        else if(numFirst == 0x8 && numLast == 0x0)
         {
-            //todo later
+            PC += 1;
+
+            V[x] = V[y];
 
         }
 
         //8XY1
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x1)
+        else if(numFirst == 0x8 && numLast == 0x1)
         {
-            //todo later
+            PC += 1;
 
+            V[x] = V[x] | V[y];
         }
 
         //8XY2
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x2)
+        else if(numFirst == 0x8 && numLast == 0x2)
         {
             //todo later
 
         }
 
         //8XY3
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x3)
+        else if(numFirst == 0x8 && numLast == 0x3)
         {
             //todo later
 
         }
 
         //8XY4
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x4)
+        else if(numFirst == 0x8 && numLast == 0x4)
         {
             //todo later
 
         }
 
         //8XY5
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x5)
+        else if(numFirst == 0x8 && numLast == 0x5)
         {
             //todo later
 
         }
 
         //8XY6
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x6)
+        else if(numFirst == 0x8 && numLast == 0x6)
         {
             //todo later
 
         }
 
         //8XY7
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0x7)
+        else if(numFirst == 0x8 && numLast == 0x7)
         {
             //todo later
 
         }
 
         //8XYE
-        else if(opcode >> 12 == 0x8 && (opcode & 0x000F) == 0xE)
+        else if(numFirst == 0x8 && numLast == 0xE)
         {
             //todo later
 
         }
         
         //9XY0
-        else if(opcode >> 12 == 0x9 && (opcode & 0x000F) == 0x0)
+        else if(numFirst == 0x9 && numLast == 0x0)
         {
             //todo later
 
         }
 
         //ANNN
-        else if(opcode >> 12 == 0xA)
+        else if(numFirst == 0xA)
         {
             //todo later
 
         }
 
         //BNNN
-        else if(opcode >> 12 == 0xB)
+        else if(numFirst == 0xB)
         {
             //todo later
 
         }
 
         //CXNN
-        else if(opcode >> 12 == 0xC)
+        else if(numFirst == 0xC)
         {
             //todo later
 
         }
 
-        //0xDXY0 - superchip 8 instruction
-        else if(opcode >> 12 == 0xD && (opcode & 0x000F) == 0x0 && chip8SuperMode)
+        //DXY0 - superchip 8 instruction
+        else if(numFirst == 0xD && numLast == 0x0 && chip8SuperMode)
         {
             //todo later
 
@@ -363,105 +387,105 @@ void cpuLoop(Uint8* data, uint32_t size)
 
 
         //DXYN
-        else if(opcode >> 12 == 0xD)
+        else if(numFirst == 0xD)
         {
             //todo later
 
         }
 
         //EX9E
-        else if(opcode >> 12 == 0xE && (opcode & 0x00FF) == 0x9E)
+        else if(numFirst == 0xE && byteLast == 0x9E)
         {
             //todo later
 
         }
 
         //EXA1
-        else if(opcode >> 12 == 0xE && (opcode & 0x00FF) == 0xA1)
+        else if(numFirst == 0xE && byteLast == 0xA1)
         {
             //todo later
 
         }
 
         //FX07
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x07)
+        else if(numFirst == 0xF && byteLast == 0x07)
         {
             //todo later
 
         }
 
         //FX0A
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x0A)
+        else if(numFirst == 0xF && byteLast == 0x0A)
         {
             //todo later
 
         }
 
         //FX15
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x15)
+        else if(numFirst == 0xF && byteLast == 0x15)
         {
             //todo later
 
         }
 
         //FX18
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x18)
+        else if(numFirst == 0xF && byteLast == 0x18)
         {
             //todo later
 
         }
 
         //FX1E
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x1E)
+        else if(numFirst == 0xF && byteLast == 0x1E)
         {
             //todo later
 
         }
 
         //FX29
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x29)
+        else if(numFirst == 0xF && byteLast == 0x29)
         {
             //todo later
 
         }
 
         //FX30 - superchip 8 instruction
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x30 && chip8SuperMode)
+        else if(numFirst == 0xF && byteLast == 0x30 && chip8SuperMode)
         {
             //todo later
 
         }
 
         //FX33
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x33)
+        else if(numFirst == 0xF && byteLast == 0x33)
         {
             //todo later
 
         }
 
         //FX55
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x55)
+        else if(numFirst == 0xF && byteLast == 0x55)
         {
             //todo later
 
         }
 
         //FX65
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x65)
+        else if(numFirst == 0xF && byteLast == 0x65)
         {
             //todo later
 
         }
 
         //FX75 - superchip 8 instruction
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x75 && chip8SuperMode)
+        else if(numFirst == 0xF && byteLast == 0x75 && chip8SuperMode)
         {
             //todo later
 
         }
 
         //FX85 - superchip 8 instruction
-        else if(opcode >> 12 == 0xF && (opcode & 0x00FF) == 0x85 && chip8SuperMode)
+        else if(numFirst == 0xF && byteLast == 0x85 && chip8SuperMode)
         {
             //todo later
 
