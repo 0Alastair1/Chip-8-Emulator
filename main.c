@@ -1,4 +1,5 @@
 
+
 #ifdef _WIN32
     #include <windows.h>
     #include <malloc.h>
@@ -36,16 +37,16 @@
 #define Uint32 uint32_t
 #define Uint64 uint64_t
 
-#define x (opcode & 0x0F00)
-#define y (opcode & 0x00F0)
+#define x (opcode & 0x0F00) >> 8
+#define y (opcode & 0x00F0) >> 4
 #define n (opcode & 0x000F)
 #define kk (opcode & 0x00FF)
 #define nnn (opcode & 0x0FFF)
-#define numFirst (opcode & 0xF000)
+#define numFirst (opcode & 0xF000) >> 12
 #define numSecond x
 #define numThird y
 #define numLast n
-#define byteFirst (opcode & 0xFF00)
+#define byteFirst (opcode & 0xFF00) >> 8
 #define byteLast kk
 
 inline bool isLittleEndian()
@@ -85,10 +86,10 @@ int main(int argc, char const *argv[])
 
 void cpuLoop(Uint8* data, uint32_t size)
 {
-    Uint16 PC;
+    Uint8 PC;
     Uint8 SP;
     Uint8 i;
-    Uint8* memory = alloca(4096);
+    Uint16* memory = alloca(4096);//type 16 instead of 8 so only have to increment PC by 1 instead of 2
     Uint8 V[16];
     Uint16 stack[16];
     Uint8 delayTimer;
@@ -109,24 +110,7 @@ void cpuLoop(Uint8* data, uint32_t size)
     delayTimer = 0;
     soundTimer = 0;
 
-    /*
-    #pragma push();
-    #pragma pack(1)
-    union{
-        Uint16 opcode;
-        struct PACKED{
-            Uint8 two:2;
-            Uint8 four:2;
-            Uint8 six:2;
-            Uint8 eight:2;
-            Uint8 ten:2;
-            Uint8 twelve:2;
-            Uint8 forteen:2;
-            Uint8 sixteen:2;
-        }bits;
-    } opcode;
-    #pragma pop();
-    */
+
 
     Uint16 opcode;
 
@@ -136,7 +120,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //fetch opcode
         if(isLittleEndian)
         {
-            opcode = memory[PC] << 8 | memory[PC + 1];
+            opcode = swap_16(*(Uint16*)&memory[PC]);
         }
         else
         {
@@ -188,7 +172,7 @@ void cpuLoop(Uint8* data, uint32_t size)
          /* end superchip 8 instructions block */
 
         //0x00E0
-        else if(opcode == 0x00E0)
+        if(opcode == 0x00E0)
         {
             //todo later
 
@@ -203,7 +187,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         }
 
         //0x00CN - superchip 8 instruction
-        else if(byteFirst == 0x00 && numThird == 0xC)
+        else if(byteFirst == 0x00 && numThird == 0xC && chip8SuperMode)
         {
             //todo later
 
@@ -298,83 +282,103 @@ void cpuLoop(Uint8* data, uint32_t size)
         {
             PC += 1;
 
-            V[x] = V[x] | V[y];
+            V[x] |= V[y];
         }
 
         //8XY2
         else if(numFirst == 0x8 && numLast == 0x2)
         {
-            //todo later
+            PC += 1;
 
+            V[x] &= V[y];
         }
 
         //8XY3
         else if(numFirst == 0x8 && numLast == 0x3)
         {
-            //todo later
+            PC += 1;
 
+            V[x] ^= V[y];
         }
 
         //8XY4
         else if(numFirst == 0x8 && numLast == 0x4)
         {
-            //todo later
+            PC += 1;
 
+            V[x] = (V[x] + V[y]) & 0x00FF;
+            V[0xF] = (V[x] > 0xFF) ? 1 : 0;
         }
 
         //8XY5
         else if(numFirst == 0x8 && numLast == 0x5)
         {
-            //todo later
+            PC += 1;
 
+            V[0xF] = (V[x] > V[y]) ? 1 : 0;
+            V[x] -= V[y];
         }
 
         //8XY6
         else if(numFirst == 0x8 && numLast == 0x6)
         {
-            //todo later
+            PC += 1;
 
+            V[0xF] = (V[x] & 0x1) ? 1 : 0;
+            V[x] >>= 1;
         }
 
         //8XY7
         else if(numFirst == 0x8 && numLast == 0x7)
         {
-            //todo later
+            PC += 1;
 
+            V[0xF] = (V[y] > V[x]) ? 1 : 0;
+            V[x] -= V[y];
         }
 
         //8XYE
         else if(numFirst == 0x8 && numLast == 0xE)
         {
-            //todo later
+            PC += 1;
 
+            V[0xF] = (V[x] & 0x0001) ? 1 : 0;
+            V[x] <<= 1;
         }
         
         //9XY0
         else if(numFirst == 0x9 && numLast == 0x0)
         {
-            //todo later
+            PC += 1;
 
+            if(V[x] != V[y])
+            {
+                PC += 1;
+            }
         }
 
         //ANNN
         else if(numFirst == 0xA)
         {
-            //todo later
+            PC += 1;
 
+            i = nnn;
         }
 
         //BNNN
         else if(numFirst == 0xB)
         {
-            //todo later
+            PC += 1;
 
+            PC = nnn + V[0];
         }
 
         //CXNN
         else if(numFirst == 0xC)
         {
-            //todo later
+            PC += 1;
+
+            V[x] = (rand() % 0xFF) & kk;
 
         }
 
@@ -410,8 +414,9 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX07
         else if(numFirst == 0xF && byteLast == 0x07)
         {
-            //todo later
+            PC += 1;
 
+            V[x] = delayTimer;
         }
 
         //FX0A
@@ -424,22 +429,25 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX15
         else if(numFirst == 0xF && byteLast == 0x15)
         {
-            //todo later
+            PC += 1;
 
+            delayTimer = V[x];
         }
 
         //FX18
         else if(numFirst == 0xF && byteLast == 0x18)
         {
-            //todo later
+            PC += 1;
 
+            soundTimer = V[x];
         }
 
         //FX1E
         else if(numFirst == 0xF && byteLast == 0x1E)
         {
-            //todo later
+            PC += 1;
 
+            i += V[x];
         }
 
         //FX29
@@ -459,21 +467,35 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX33
         else if(numFirst == 0xF && byteLast == 0x33)
         {
-            //todo later
+            PC += 1;
+
+            memory[i] = (V[x] / 100) % 10;
+            memory[i + 1] = (V[x] / 10) % 10;
+            memory[i + 2] = (V[x] / 1) % 10;
 
         }
 
         //FX55
         else if(numFirst == 0xF && byteLast == 0x55)
         {
-            //todo later
+            PC += 1;
+
+            for(int ii = 0; ii <= x; ii++)
+            {
+                memory[i + ii] = V[ii];
+            }
 
         }
 
         //FX65
         else if(numFirst == 0xF && byteLast == 0x65)
         {
-            //todo later
+            PC += 1;
+
+            for(int ii = 0; ii <= x; ii++)
+            {
+                V[ii] = memory[i + ii];
+            }
 
         }
 
