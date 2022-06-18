@@ -1,9 +1,4 @@
 
-#define UNICODE
-#define _UNICODE
-#define _CRT_NON_CONFORMING_SWPRINTFS
-
-
 #ifdef _WIN32
     #include <windows.h>
     #include <malloc.h>
@@ -36,6 +31,9 @@
 #include <time.h>
 #include <string.h>
 #include <locale.h>
+
+
+#include <SDL2/SDL.h>
 
 #define Uint8 uint8_t
 #define Uint16 uint16_t
@@ -91,11 +89,6 @@ struct file readFile(char*);
 
 int main(int argc, char const *argv[])
 {
-    //Set unicode
-    #ifdef _WIN32
-        SetConsoleOutputCP(CP_UTF8);
-    #endif
-    setlocale(LC_ALL, "en_US.UTF-8");
 
     char* filepath = openFile();
     struct file file = readFile(filepath);

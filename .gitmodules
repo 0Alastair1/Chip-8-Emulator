@@ -1,6 +1,7 @@
 [submodule "Vendor/SDL2"]
 	path = Vendor/SDL2
 	url = https://github.com/libsdl-org/SDL
-[submodule "Vendor/Portable-file-dialogs"]
-	path = Vendor/Portable-file-dialogs
-	url = https://github.com/samhocevar/portable-file-dialogs
+	
+[submodule "Vendor/tinyfd"]
+	path = Vendor/tinyfd
+	url = http://git.code.sf.net/p/tinyfiledialogs/code
