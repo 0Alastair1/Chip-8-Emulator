@@ -6,6 +6,7 @@ A chip-8 and superchip emulator in C.
 
 1) Install cmake
 2) Install a C compiler
+3) Open a terminal in a home directory and enter commands below
 
 ```
 git clone https://github.com/0Alastair1/Chip-8-Emulator --recursive  
