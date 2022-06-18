@@ -37,6 +37,8 @@
 #define Uint32 uint32_t
 #define Uint64 uint64_t
 
+
+
 #define x (opcode & 0x0F00) >> 8
 #define y (opcode & 0x00F0) >> 4
 #define n (opcode & 0x000F)
@@ -66,6 +68,15 @@ struct file{
     uint32_t size;
 };
 
+struct strangeTypeSizes
+{
+    struct
+    {
+        Uint16 i: 12;
+    };
+    
+}typeSizesStruct;
+#define i (typeSizesStruct.i)
 
 //https://en.wikipedia.org/wiki/CHIP-8
 //http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
@@ -88,10 +99,9 @@ void cpuLoop(Uint8* data, uint32_t size)
 {
     Uint8 PC;
     Uint8 SP;
-    Uint8 i;
-    Uint16* memory = alloca(4096);//type 16 instead of 8 so only have to increment PC by 1 instead of 2
+    Uint8* memory = alloca(4096);
     Uint8 V[16];
-    Uint16 stack[16];
+    Uint16 stack[32];
     Uint8 delayTimer;
     Uint8 soundTimer;
 
@@ -101,11 +111,12 @@ void cpuLoop(Uint8* data, uint32_t size)
     //starting at 0x00
     PC = 0x00;
     SP = 0x00;
+    
 
-    for(i = 0; i < 16; i++)
+    for(size_t ii = 0; ii < 16; ii++)
     {
-        V[i] = 0;
-        stack[i] = 0;
+        V[ii] = 0;
+        stack[ii] = 0;
     }
     delayTimer = 0;
     soundTimer = 0;
@@ -197,7 +208,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //0NNN - checkme
         else if(numFirst == 0x0)
         {
-            PC += 1;
+            PC += 2;
             
             PC = memory[PC];
 
@@ -220,33 +231,33 @@ void cpuLoop(Uint8* data, uint32_t size)
         //3XKK
         else if(numFirst == 0x3)
         {
-            PC += 1;
+            PC += 2;
 
             if(V[x] == kk)
             {
-                PC += 1;
+                PC += 2;
             }
         }
 
         //4XKK
         else if(numFirst == 0x4)
         {
-            PC += 1;
+            PC += 2;
 
             if(V[x] != kk)
             {
-                PC += 1;
+                PC += 2;
             }
         }
 
         //5XY0
         else if(numFirst == 0x5 && numLast == 0x0)
         {
-            PC += 1;
+            PC += 2;
 
             if(V[x] == V[y])
             {
-                PC += 1;
+                PC += 2;
             }
 
         }
@@ -254,7 +265,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //6XNN
         else if(numFirst == 0x6)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] = kk;
 
@@ -263,7 +274,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //7XNN
         else if(numFirst == 0x7)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] += kk;
         }
@@ -271,7 +282,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY0
         else if(numFirst == 0x8 && numLast == 0x0)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] = V[y];
 
@@ -280,7 +291,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY1
         else if(numFirst == 0x8 && numLast == 0x1)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] |= V[y];
         }
@@ -288,7 +299,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY2
         else if(numFirst == 0x8 && numLast == 0x2)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] &= V[y];
         }
@@ -296,7 +307,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY3
         else if(numFirst == 0x8 && numLast == 0x3)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] ^= V[y];
         }
@@ -304,7 +315,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY4
         else if(numFirst == 0x8 && numLast == 0x4)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] = (V[x] + V[y]) & 0x00FF;
             V[0xF] = (V[x] > 0xFF) ? 1 : 0;
@@ -313,7 +324,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY5
         else if(numFirst == 0x8 && numLast == 0x5)
         {
-            PC += 1;
+            PC += 2;
 
             V[0xF] = (V[x] > V[y]) ? 1 : 0;
             V[x] -= V[y];
@@ -322,7 +333,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY6
         else if(numFirst == 0x8 && numLast == 0x6)
         {
-            PC += 1;
+            PC += 2;
 
             V[0xF] = (V[x] & 0x1) ? 1 : 0;
             V[x] >>= 1;
@@ -331,7 +342,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XY7
         else if(numFirst == 0x8 && numLast == 0x7)
         {
-            PC += 1;
+            PC += 2;
 
             V[0xF] = (V[y] > V[x]) ? 1 : 0;
             V[x] -= V[y];
@@ -340,7 +351,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //8XYE
         else if(numFirst == 0x8 && numLast == 0xE)
         {
-            PC += 1;
+            PC += 2;
 
             V[0xF] = (V[x] & 0x0001) ? 1 : 0;
             V[x] <<= 1;
@@ -349,18 +360,18 @@ void cpuLoop(Uint8* data, uint32_t size)
         //9XY0
         else if(numFirst == 0x9 && numLast == 0x0)
         {
-            PC += 1;
+            PC += 2;
 
             if(V[x] != V[y])
             {
-                PC += 1;
+                PC += 2;
             }
         }
 
         //ANNN
         else if(numFirst == 0xA)
         {
-            PC += 1;
+            PC += 2;
 
             i = nnn;
         }
@@ -368,7 +379,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //BNNN
         else if(numFirst == 0xB)
         {
-            PC += 1;
+            PC += 2;
 
             PC = nnn + V[0];
         }
@@ -376,7 +387,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //CXNN
         else if(numFirst == 0xC)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] = (rand() % 0xFF) & kk;
 
@@ -414,7 +425,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX07
         else if(numFirst == 0xF && byteLast == 0x07)
         {
-            PC += 1;
+            PC += 2;
 
             V[x] = delayTimer;
         }
@@ -429,7 +440,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX15
         else if(numFirst == 0xF && byteLast == 0x15)
         {
-            PC += 1;
+            PC += 2;
 
             delayTimer = V[x];
         }
@@ -437,7 +448,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX18
         else if(numFirst == 0xF && byteLast == 0x18)
         {
-            PC += 1;
+            PC += 2;
 
             soundTimer = V[x];
         }
@@ -445,7 +456,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX1E
         else if(numFirst == 0xF && byteLast == 0x1E)
         {
-            PC += 1;
+            PC += 2;
 
             i += V[x];
         }
@@ -467,7 +478,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX33
         else if(numFirst == 0xF && byteLast == 0x33)
         {
-            PC += 1;
+            PC += 2;
 
             memory[i] = (V[x] / 100) % 10;
             memory[i + 1] = (V[x] / 10) % 10;
@@ -478,7 +489,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX55
         else if(numFirst == 0xF && byteLast == 0x55)
         {
-            PC += 1;
+            PC += 2;
 
             for(int ii = 0; ii <= x; ii++)
             {
@@ -490,7 +501,7 @@ void cpuLoop(Uint8* data, uint32_t size)
         //FX65
         else if(numFirst == 0xF && byteLast == 0x65)
         {
-            PC += 1;
+            PC += 2;
 
             for(int ii = 0; ii <= x; ii++)
             {
