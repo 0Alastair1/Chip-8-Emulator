@@ -1,4 +1,8 @@
 
+#define UNICODE
+#define _UNICODE
+#define _CRT_NON_CONFORMING_SWPRINTFS
+
 
 #ifdef _WIN32
     #include <windows.h>
@@ -31,12 +35,12 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <locale.h>
 
 #define Uint8 uint8_t
 #define Uint16 uint16_t
 #define Uint32 uint32_t
 #define Uint64 uint64_t
-
 
 
 #define x (opcode & 0x0F00) >> 8
@@ -57,10 +61,6 @@ inline bool isLittleEndian()
     return *(Uint8*)&val == 0xFF;
 }
 
-bool chip8SuperMode;
-
-Uint8 Width = 128;
-Uint8 Height = 64;
 
 
 struct file{
@@ -83,12 +83,20 @@ struct strangeTypeSizes
 //https://tobiasvl.github.io/blog/write-a-chip-8-emulator
 //http://johnearnest.github.io/Octo/docs/SuperChip.html
 
+
 void cpuLoop(Uint8*, uint32_t);
 char* openFile();
 struct file readFile(char*);
 
+
 int main(int argc, char const *argv[])
 {
+    //Set unicode
+    #ifdef _WIN32
+        SetConsoleOutputCP(CP_UTF8);
+    #endif
+    setlocale(LC_ALL, "en_US.UTF-8");
+
     char* filepath = openFile();
     struct file file = readFile(filepath);
     cpuLoop(file.data, file.size);
@@ -122,6 +130,11 @@ void cpuLoop(Uint8* data, uint32_t size)
     soundTimer = 0;
 
 
+    Uint8 Width = 128;
+    Uint8 Height = 64;
+    bool chip8SuperMode;
+
+    Uint8 pixels[Width][Height];
 
     Uint16 opcode;
 
@@ -142,401 +155,406 @@ void cpuLoop(Uint8* data, uint32_t size)
         
         //decode and execute opcode
 
-        
-        //0x00FB - chip8 super instrcution
-        if(opcode == 0x00FB)
         {
-            chip8SuperMode = true;
-            //todo later
+            //0x00FB - chip8 super instrcution
+            if(opcode == 0x00FB)
+            {
+                chip8SuperMode = true;
+                //todo later
 
-        }
-        
-        //0x00FC - chip8 super instruction
-        if(opcode == 0x00FC)
-        {
-            chip8SuperMode = true;
-            //todo later
+            }
+            
+            //0x00FC - chip8 super instruction
+            if(opcode == 0x00FC)
+            {
+                chip8SuperMode = true;
+                //todo later
 
-        }
+            }
 
-        //0x00FD - chip8 super instruction
-        if(opcode == 0x00FD)
-        {
-            chip8SuperMode = true;
-            //todo later
+            //0x00FD - chip8 super instruction
+            if(opcode == 0x00FD)
+            {
+                chip8SuperMode = true;
+                //todo later
 
-        }
+            }
 
-        //0x00FE - chip8 super instruction
-        if(opcode == 0x00FE)
-        {
-            chip8SuperMode = true;
-            //todo later
+            //0x00FE - chip8 super instruction
+            if(opcode == 0x00FE)
+            {
+                chip8SuperMode = true;
+                //todo later
 
-        }
+            }
 
-        //0x00FF - chip8 super instruction
-        if(opcode == 0x00FF)
-        {
-            chip8SuperMode = true;
-            //todo later
+            //0x00FF - chip8 super instruction
+            if(opcode == 0x00FF)
+            {
+                chip8SuperMode = true;
+                //todo later
 
-        }
-        
+            }
+            
 
-        //0x00E0
-        if(opcode == 0x00E0)
-        {
-            //todo later
+            //0x00E0
+            if(opcode == 0x00E0)
+            {
+                //todo later
 
-        }
+            }
 
-        //0x00EE
-        else if(opcode == 0x00EE)
-        {
-            PC = stack[SP];
-            SP--;
+            //0x00EE
+            else if(opcode == 0x00EE)
+            {
+                PC = stack[SP];
+                SP--;
 
-        }
+            }
 
-        //0x00CN - superchip 8 instruction
-        else if(byteFirst == 0x00 && numThird == 0xC)
-        {
-            chip8SuperMode = true;
-            //todo later
+            //0x00CN - superchip 8 instruction
+            else if(byteFirst == 0x00 && numThird == 0xC)
+            {
+                chip8SuperMode = true;
+                //todo later
 
-        }
+            }
 
 
-        //0NNN - checkme
-        else if(numFirst == 0x0)
-        {
-            //todo later
+            //0NNN - checkme
+            else if(numFirst == 0x0)
+            {
+                //todo later
 
-        }
+            }
 
-        //1NNN
-        else if(numFirst == 0x1)
-        {
-            PC = nnn;
-        }
+            //1NNN
+            else if(numFirst == 0x1)
+            {
+                PC = nnn;
+            }
 
-        //2NNN
-        else if(numFirst == 0x2)
-        {
-            SP += 1;
-            stack[SP] = PC;
-            PC = nnn;
-        }
+            //2NNN
+            else if(numFirst == 0x2)
+            {
+                SP += 1;
+                stack[SP] = PC;
+                PC = nnn;
+            }
 
-        //3XKK
-        else if(numFirst == 0x3)
-        {
-            PC += 2;
-
-            if(V[x] == kk)
+            //3XKK
+            else if(numFirst == 0x3)
             {
                 PC += 2;
+
+                if(V[x] == kk)
+                {
+                    PC += 2;
+                }
             }
-        }
 
-        //4XKK
-        else if(numFirst == 0x4)
-        {
-            PC += 2;
-
-            if(V[x] != kk)
+            //4XKK
+            else if(numFirst == 0x4)
             {
                 PC += 2;
+
+                if(V[x] != kk)
+                {
+                    PC += 2;
+                }
             }
-        }
 
-        //5XY0
-        else if(numFirst == 0x5 && numLast == 0x0)
-        {
-            PC += 2;
-
-            if(V[x] == V[y])
+            //5XY0
+            else if(numFirst == 0x5 && numLast == 0x0)
             {
                 PC += 2;
+
+                if(V[x] == V[y])
+                {
+                    PC += 2;
+                }
+
+            }
+            
+            //6XNN
+            else if(numFirst == 0x6)
+            {
+                PC += 2;
+
+                V[x] = kk;
+
             }
 
+            //7XNN
+            else if(numFirst == 0x7)
+            {
+                PC += 2;
+
+                V[x] += kk;
+            }
+
+            //8XY0
+            else if(numFirst == 0x8 && numLast == 0x0)
+            {
+                PC += 2;
+
+                V[x] = V[y];
+
+            }
+
+            //8XY1
+            else if(numFirst == 0x8 && numLast == 0x1)
+            {
+                PC += 2;
+
+                V[x] |= V[y];
+            }
+
+            //8XY2
+            else if(numFirst == 0x8 && numLast == 0x2)
+            {
+                PC += 2;
+
+                V[x] &= V[y];
+            }
+
+            //8XY3
+            else if(numFirst == 0x8 && numLast == 0x3)
+            {
+                PC += 2;
+
+                V[x] ^= V[y];
+            }
+
+            //8XY4
+            else if(numFirst == 0x8 && numLast == 0x4)
+            {
+                PC += 2;
+
+                V[x] = (V[x] + V[y]) & 0x00FF;
+                V[0xF] = (V[x] > 0xFF) ? 1 : 0;
+            }
+
+            //8XY5
+            else if(numFirst == 0x8 && numLast == 0x5)
+            {
+                PC += 2;
+
+                V[0xF] = (V[x] > V[y]) ? 1 : 0;
+                V[x] -= V[y];
+            }
+
+            //8XY6
+            else if(numFirst == 0x8 && numLast == 0x6)
+            {
+                PC += 2;
+
+                V[0xF] = (V[x] & 0x1) ? 1 : 0;
+                V[x] >>= 1;
+            }
+
+            //8XY7
+            else if(numFirst == 0x8 && numLast == 0x7)
+            {
+                PC += 2;
+
+                V[0xF] = (V[y] > V[x]) ? 1 : 0;
+                V[x] -= V[y];
+            }
+
+            //8XYE
+            else if(numFirst == 0x8 && numLast == 0xE)
+            {
+                PC += 2;
+
+                V[0xF] = (V[x] & 0x0001) ? 1 : 0;
+                V[x] <<= 1;
+            }
+            
+            //9XY0
+            else if(numFirst == 0x9 && numLast == 0x0)
+            {
+                PC += 2;
+
+                if(V[x] != V[y])
+                {
+                    PC += 2;
+                }
+            }
+
+            //ANNN
+            else if(numFirst == 0xA)
+            {
+                PC += 2;
+
+                i = nnn;
+            }
+
+            //BNNN
+            else if(numFirst == 0xB)
+            {
+                PC += 2;
+
+                PC = nnn + V[0];
+            }
+
+            //CXNN
+            else if(numFirst == 0xC)
+            {
+                PC += 2;
+
+                V[x] = (rand() % 0xFF) & kk;
+
+            }
+
+            //DXY0 - superchip 8 instruction
+            else if(numFirst == 0xD && numLast == 0x0)
+            {
+                chip8SuperMode = true;
+                //todo later
+
+            }
+
+
+            //DXYN
+            else if(numFirst == 0xD)
+            {
+                //todo later
+
+            }
+
+            //EX9E
+            else if(numFirst == 0xE && byteLast == 0x9E)
+            {
+                //todo later
+
+            }
+
+            //EXA1
+            else if(numFirst == 0xE && byteLast == 0xA1)
+            {
+                //todo later
+
+            }
+
+            //FX07
+            else if(numFirst == 0xF && byteLast == 0x07)
+            {
+                PC += 2;
+
+                V[x] = delayTimer;
+            }
+
+            //FX0A
+            else if(numFirst == 0xF && byteLast == 0x0A)
+            {
+                //todo later
+
+            }
+
+            //FX15
+            else if(numFirst == 0xF && byteLast == 0x15)
+            {
+                PC += 2;
+
+                delayTimer = V[x];
+            }
+
+            //FX18
+            else if(numFirst == 0xF && byteLast == 0x18)
+            {
+                PC += 2;
+
+                soundTimer = V[x];
+            }
+
+            //FX1E
+            else if(numFirst == 0xF && byteLast == 0x1E)
+            {
+                PC += 2;
+
+                i += V[x];
+            }
+
+            //FX29
+            else if(numFirst == 0xF && byteLast == 0x29)
+            {
+                //todo later
+
+            }
+
+            //FX30 - superchip 8 instruction
+            else if(numFirst == 0xF && byteLast == 0x30)
+            {
+                chip8SuperMode = true;
+                //todo later
+
+            }
+
+            //FX33
+            else if(numFirst == 0xF && byteLast == 0x33)
+            {
+                PC += 2;
+
+                memory[i] = (V[x] / 100) % 10;
+                memory[i + 1] = (V[x] / 10) % 10;
+                memory[i + 2] = (V[x] / 1) % 10;
+
+            }
+
+            //FX55
+            else if(numFirst == 0xF && byteLast == 0x55)
+            {
+                PC += 2;
+
+                for(int ii = 0; ii <= x; ii++)
+                {
+                    memory[i + ii] = V[ii];
+                }
+
+            }
+
+            //FX65
+            else if(numFirst == 0xF && byteLast == 0x65)
+            {
+                PC += 2;
+
+                for(int ii = 0; ii <= x; ii++)
+                {
+                    V[ii] = memory[i + ii];
+                }
+
+            }
+
+            //FX75 - superchip 8 instruction
+            else if(numFirst == 0xF && byteLast == 0x75)
+            {
+                chip8SuperMode = true;
+                //todo later
+
+            }
+
+            //FX85 - superchip 8 instruction
+            else if(numFirst == 0xF && byteLast == 0x85)
+            {
+                chip8SuperMode = true;
+                //todo later
+
+            }
+
+            else
+            {
+                printf("Unhandled opcode: %X\n At address: %X\n", opcode, PC);
+            }
         }
+
+
         
-        //6XNN
-        else if(numFirst == 0x6)
-        {
-            PC += 2;
-
-            V[x] = kk;
-
-        }
-
-        //7XNN
-        else if(numFirst == 0x7)
-        {
-            PC += 2;
-
-            V[x] += kk;
-        }
-
-        //8XY0
-        else if(numFirst == 0x8 && numLast == 0x0)
-        {
-            PC += 2;
-
-            V[x] = V[y];
-
-        }
-
-        //8XY1
-        else if(numFirst == 0x8 && numLast == 0x1)
-        {
-            PC += 2;
-
-            V[x] |= V[y];
-        }
-
-        //8XY2
-        else if(numFirst == 0x8 && numLast == 0x2)
-        {
-            PC += 2;
-
-            V[x] &= V[y];
-        }
-
-        //8XY3
-        else if(numFirst == 0x8 && numLast == 0x3)
-        {
-            PC += 2;
-
-            V[x] ^= V[y];
-        }
-
-        //8XY4
-        else if(numFirst == 0x8 && numLast == 0x4)
-        {
-            PC += 2;
-
-            V[x] = (V[x] + V[y]) & 0x00FF;
-            V[0xF] = (V[x] > 0xFF) ? 1 : 0;
-        }
-
-        //8XY5
-        else if(numFirst == 0x8 && numLast == 0x5)
-        {
-            PC += 2;
-
-            V[0xF] = (V[x] > V[y]) ? 1 : 0;
-            V[x] -= V[y];
-        }
-
-        //8XY6
-        else if(numFirst == 0x8 && numLast == 0x6)
-        {
-            PC += 2;
-
-            V[0xF] = (V[x] & 0x1) ? 1 : 0;
-            V[x] >>= 1;
-        }
-
-        //8XY7
-        else if(numFirst == 0x8 && numLast == 0x7)
-        {
-            PC += 2;
-
-            V[0xF] = (V[y] > V[x]) ? 1 : 0;
-            V[x] -= V[y];
-        }
-
-        //8XYE
-        else if(numFirst == 0x8 && numLast == 0xE)
-        {
-            PC += 2;
-
-            V[0xF] = (V[x] & 0x0001) ? 1 : 0;
-            V[x] <<= 1;
-        }
-        
-        //9XY0
-        else if(numFirst == 0x9 && numLast == 0x0)
-        {
-            PC += 2;
-
-            if(V[x] != V[y])
-            {
-                PC += 2;
-            }
-        }
-
-        //ANNN
-        else if(numFirst == 0xA)
-        {
-            PC += 2;
-
-            i = nnn;
-        }
-
-        //BNNN
-        else if(numFirst == 0xB)
-        {
-            PC += 2;
-
-            PC = nnn + V[0];
-        }
-
-        //CXNN
-        else if(numFirst == 0xC)
-        {
-            PC += 2;
-
-            V[x] = (rand() % 0xFF) & kk;
-
-        }
-
-        //DXY0 - superchip 8 instruction
-        else if(numFirst == 0xD && numLast == 0x0)
-        {
-            chip8SuperMode = true;
-            //todo later
-
-        }
-
-
-        //DXYN
-        else if(numFirst == 0xD)
-        {
-            //todo later
-
-        }
-
-        //EX9E
-        else if(numFirst == 0xE && byteLast == 0x9E)
-        {
-            //todo later
-
-        }
-
-        //EXA1
-        else if(numFirst == 0xE && byteLast == 0xA1)
-        {
-            //todo later
-
-        }
-
-        //FX07
-        else if(numFirst == 0xF && byteLast == 0x07)
-        {
-            PC += 2;
-
-            V[x] = delayTimer;
-        }
-
-        //FX0A
-        else if(numFirst == 0xF && byteLast == 0x0A)
-        {
-            //todo later
-
-        }
-
-        //FX15
-        else if(numFirst == 0xF && byteLast == 0x15)
-        {
-            PC += 2;
-
-            delayTimer = V[x];
-        }
-
-        //FX18
-        else if(numFirst == 0xF && byteLast == 0x18)
-        {
-            PC += 2;
-
-            soundTimer = V[x];
-        }
-
-        //FX1E
-        else if(numFirst == 0xF && byteLast == 0x1E)
-        {
-            PC += 2;
-
-            i += V[x];
-        }
-
-        //FX29
-        else if(numFirst == 0xF && byteLast == 0x29)
-        {
-            //todo later
-
-        }
-
-        //FX30 - superchip 8 instruction
-        else if(numFirst == 0xF && byteLast == 0x30)
-        {
-            chip8SuperMode = true;
-            //todo later
-
-        }
-
-        //FX33
-        else if(numFirst == 0xF && byteLast == 0x33)
-        {
-            PC += 2;
-
-            memory[i] = (V[x] / 100) % 10;
-            memory[i + 1] = (V[x] / 10) % 10;
-            memory[i + 2] = (V[x] / 1) % 10;
-
-        }
-
-        //FX55
-        else if(numFirst == 0xF && byteLast == 0x55)
-        {
-            PC += 2;
-
-            for(int ii = 0; ii <= x; ii++)
-            {
-                memory[i + ii] = V[ii];
-            }
-
-        }
-
-        //FX65
-        else if(numFirst == 0xF && byteLast == 0x65)
-        {
-            PC += 2;
-
-            for(int ii = 0; ii <= x; ii++)
-            {
-                V[ii] = memory[i + ii];
-            }
-
-        }
-
-        //FX75 - superchip 8 instruction
-        else if(numFirst == 0xF && byteLast == 0x75)
-        {
-            chip8SuperMode = true;
-            //todo later
-
-        }
-
-        //FX85 - superchip 8 instruction
-        else if(numFirst == 0xF && byteLast == 0x85)
-        {
-            chip8SuperMode = true;
-            //todo later
-
-        }
-
-        else
-        {
-            printf("Unhandled opcode: %X\n At address: %X\n", opcode, PC);
-        }
     }
 
     return;
 }
+
 
 char* openFile()
 {
