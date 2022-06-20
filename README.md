@@ -1,7 +1,7 @@
 # Chip-8 Emulator  (WIP)
  
 A Chip-8, Chip-48/superchip and ETI660 emulator in C.  
-The project aims to be able to run every game and program written for Chip-8 and Chip-48.
+
 
 ## Building (Linux and Windows):  
 
