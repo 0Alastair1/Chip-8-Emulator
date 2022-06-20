@@ -130,7 +130,6 @@ void initSDL(SDL_Window** window, SDL_Renderer** renderer)
 
 void inputs()
 {
-    keyboard.keyboard = 0;
 
     SDL_Event event;
     while(SDL_PollEvent(&event))
@@ -215,6 +214,82 @@ void inputs()
                     break;
             }
         }
+        if(event.type == SDL_KEYUP)
+        {
+            switch(event.key.keysym.sym)
+            {
+                case SDLK_1:
+                    keyboard.keys.key1 = 0;
+                    break;
+
+                case SDLK_2:
+                    keyboard.keys.key2 = 0;
+                    break;
+                
+                case SDLK_3:
+                    keyboard.keys.key3 = 0;
+                    break;
+                    
+                case SDLK_4:
+                    keyboard.keys.keyC = 0;
+                    break;
+
+                case SDLK_q:
+                    keyboard.keys.key4 = 0;
+                    break;
+
+                case SDLK_w:
+                    keyboard.keys.key5 = 0;
+                    break;
+
+                case SDLK_e:
+                    keyboard.keys.key6 = 0;
+                    break;
+
+                case SDLK_r:
+                    keyboard.keys.keyD = 0;
+                    break;
+
+                case SDLK_a:
+                    keyboard.keys.key7 = 0;
+                    break;
+
+                case SDLK_s:
+                    keyboard.keys.key8 = 0;
+                    break;
+
+                case SDLK_d:
+                    keyboard.keys.key9 = 0;
+                    break;
+                
+                case SDLK_f:
+                    keyboard.keys.keyE = 0;
+                    break;
+
+                case SDLK_z:
+                    keyboard.keys.keyA = 0;
+                    break;
+
+                case SDLK_x:
+                    keyboard.keys.key0 = 0;
+                    break;
+
+                case SDLK_c:
+                    keyboard.keys.keyB = 0;
+                    break;
+
+                case SDLK_v:
+                    keyboard.keys.keyF = 0;
+                    break;
+
+                case SDLK_ESCAPE:
+                    exit(0);
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 }
 
@@ -229,6 +304,9 @@ void cpuLoop(Uint8* data, uint32_t size)
     Uint8 soundTimer;
     struct strangeTypeSizes typeSizesStruct;
     bool ETI660Mode = false;
+
+    SDL_Window* window;
+    SDL_Renderer* renderer;
 
     Uint8 screen[width_s][height_s];
 
@@ -276,8 +354,6 @@ void cpuLoop(Uint8* data, uint32_t size)
     Uint16 opcode;
 
     //initialize SDL and store the result
-    SDL_Window* window;
-    SDL_Renderer* renderer;
     initSDL(&window, &renderer);
     SDL_ShowWindow(window);
 
@@ -285,6 +361,9 @@ void cpuLoop(Uint8* data, uint32_t size)
     //cpu loop
     while (true)
     {
+
+        //sleep
+        SDL_Delay(10);
         //fetch opcode
         if(isLittleEndian)
         {
@@ -462,7 +541,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[x] |= V[y];
+                V[x] = V[x] | V[y];
             }
 
             //8XY2
@@ -470,7 +549,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[x] &= V[y];
+                V[x] = V[x] & V[y];
             }
 
             //8XY3
@@ -478,7 +557,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[x] ^= V[y];
+                V[x] = V[x] ^ V[y];
             }
 
             //8XY4
@@ -486,7 +565,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[x] = (V[x] + V[y]) & 0x00FF;
+                V[x] = (V[x] + V[y]) & 0x00FF;//checkme
                 V[0xF] = (V[x] > 0xFF) ? 1 : 0;
             }
 
@@ -496,7 +575,7 @@ void cpuLoop(Uint8* data, uint32_t size)
                 PC += 2;
 
                 V[0xF] = (V[x] > V[y]) ? 1 : 0;
-                V[x] -= V[y];
+                V[x] = V[x] - V[y];
             }
 
             //8XY6
@@ -504,6 +583,11 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
+                if(!superChip8Mode)
+                {
+                    V[x] = V[y];
+                }
+                
                 V[0xF] = (V[x] & 0x1) ? 1 : 0;
                 V[x] >>= 1;
             }
@@ -514,13 +598,18 @@ void cpuLoop(Uint8* data, uint32_t size)
                 PC += 2;
 
                 V[0xF] = (V[y] > V[x]) ? 1 : 0;
-                V[x] -= V[y];
+                V[x] = V[y] - V[x];
             }
 
             //8XYE
             else if(numFirst == 0x8 && numLast == 0xE)
             {
                 PC += 2;
+
+                if(!superChip8Mode)
+                {
+                    V[x] = V[y];
+                }
 
                 V[0xF] = (V[x] & 0x0001) ? 1 : 0;
                 V[x] <<= 1;
@@ -548,9 +637,8 @@ void cpuLoop(Uint8* data, uint32_t size)
             //BNNN
             else if(numFirst == 0xB)
             {
-                PC += 2;
-
                 PC = nnn + V[0];
+                //fixme
             }
 
             //CXNN
@@ -647,15 +735,23 @@ void cpuLoop(Uint8* data, uint32_t size)
             //EX9E
             else if(numFirst == 0xE && byteLast == 0x9E)
             {
-                //todo later
+                PC += 2;
+                if(keyboard.keyboard & (1 << V[x]))
+                {
+                    PC += 2;
+                }
 
             }
 
             //EXA1
             else if(numFirst == 0xE && byteLast == 0xA1)
             {
-                //todo later
 
+                PC += 2;
+                if(!(keyboard.keyboard & (1 << V[x])))
+                {
+                    PC += 2;
+                }
             }
 
             //FX07
@@ -669,8 +765,15 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX0A
             else if(numFirst == 0xF && byteLast == 0x0A)
             {
-                //todo later
-
+                for(size_t i = 0; i < 16; i++)
+                {
+                    if(keyboard.keyboard >> i & 0x1)
+                    {
+                        PC += 2;
+                        V[x] = i;
+                        break;
+                    }
+                }
             }
 
             //FX15
@@ -700,6 +803,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX29
             else if(numFirst == 0xF && byteLast == 0x29)
             {
+                PC += 2;
                 //todo later
 
             }
