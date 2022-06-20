@@ -82,6 +82,26 @@ struct strangeTypeSizes
 //https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/
 //http://www.emulator101.com/chip-8-sprites.html
 
+//font
+const Uint8 font[80] = {
+    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};                                              
+
 
 void cpuLoop(Uint8*, uint32_t);
 char* openFile();
@@ -340,6 +360,8 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     SP = 0x00;
     
+    //copy font to memory
+    memcpy(memory, font, 80);
 
     for(size_t ii = 0; ii < 16; ii++)
     {
@@ -369,7 +391,7 @@ void cpuLoop(Uint8* data, uint32_t size)
     {
 
         //sleep fixme
-        SDL_Delay(10);
+        SDL_Delay(1);
 
         //fetch opcode
         if(isLittleEndian)
@@ -575,8 +597,8 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[x] = (V[x] + V[y]) & 0x00FF;//checkme
-                V[0xF] = (V[x] > 0xFF) ? 1 : 0;
+                V[0xF] = ((V[x] + V[y]) > 0xFF) ? 1 : 0;
+                V[x] = (V[x] + V[y]); //checkme
             }
 
             //8XY5
@@ -621,7 +643,7 @@ void cpuLoop(Uint8* data, uint32_t size)
                     V[x] = V[y];
                 }
 
-                V[0xF] = (V[x] & 0x0001) ? 1 : 0;
+                V[0xF] = (V[x] >> 7) & 0x1;
                 V[x] <<= 1;
             }
             
@@ -842,7 +864,8 @@ void cpuLoop(Uint8* data, uint32_t size)
             else if(numFirst == 0xF && byteLast == 0x29)
             {
                 PC += 2;
-                //todo later
+                
+                I = V[x] * 5;
 
             }
 
@@ -865,14 +888,25 @@ void cpuLoop(Uint8* data, uint32_t size)
 
             }
 
-            //FX55
+            //FX55 checkme
             else if(numFirst == 0xF && byteLast == 0x55)
             {
                 PC += 2;
 
-                for(int ii = 0; ii <= x; ii++)
+                if(!superChip8Mode)
                 {
-                    memory[I + ii] = V[ii];
+                    for(I = I; I <= x; I++)
+                    {
+                        memory[I] = V[I];
+                    }
+                    I = I + 1;
+                }
+                else
+                {
+                    for(int ii = 0; ii <= x; ii++)
+                    {
+                        memory[I + ii] = V[ii];
+                    }
                 }
 
             }
