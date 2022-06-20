@@ -1,6 +1,6 @@
 # Chip-8 Emulator  (WIP)
  
-A work in progress Chip-8, Chip-48/superchip and ETI660 emulator in C.  
+A work in progress Chip-8, Chip-48/superchip and ETI660 Chip-8 emulator in C.  
 
 
 ## Building (Linux and Windows):  
