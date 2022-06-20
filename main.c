@@ -385,6 +385,84 @@ void cpuLoop(Uint8* data, uint32_t size)
     initSDL(&window, &renderer);
     SDL_ShowWindow(window);
 
+    //search through memory for superchip opcodes,set the superchip mode to true if found and break
+    SP += 1;
+    stack[SP] = PC;
+    for(size_t i = 0; i < size; i+=2)
+    {
+        PC = (Uint16)i;
+
+        if(isLittleEndian)
+        {
+            opcode = swap_16( (*(Uint16*)&memory[PC]) & 0xFFFF);
+        }
+        else
+        {
+            opcode = (*(Uint16*)&memory[PC] & 0xFFFF);
+        }
+
+        if(opcode == 0x00FB)
+        {
+            superChip8Mode = true;
+            break;
+        }
+
+        else if(opcode == 0x00FC)
+        {
+            superChip8Mode = true;
+            break;
+        }
+        else if(opcode == 0x00FD)
+        {
+            superChip8Mode = true;
+            break;
+        }
+        else if(opcode == 0x00FE)
+        {
+            superChip8Mode = true;
+            break;
+        }
+        else if(opcode == 0x00FF)
+        {
+            superChip8Mode = true;
+            break;
+        }
+
+        else if(byteFirst == 0x00 && numThird == 0xC)
+        {
+            superChip8Mode = true;
+            break;
+        }
+
+        else if(numFirst == 0xD && numLast == 0x0)
+        {
+            superChip8Mode = true;
+            break;
+        }
+
+        else if(numFirst == 0xF && byteLast == 0x30)
+        {
+            superChip8Mode = true;
+            break;
+        }
+
+        else if(numFirst == 0xF && byteLast == 0x75)
+        {
+            superChip8Mode = true;
+            break;
+        }
+
+        else if(numFirst == 0xF && byteLast == 0x85)
+        {
+            superChip8Mode = true;
+            break;
+        }
+
+
+
+    } 
+    PC = stack[SP];
+    SP--;
 
     //cpu loop
     while (true)
@@ -411,7 +489,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FB - chip8 super instrcution
             if(opcode == 0x00FB)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
@@ -419,7 +497,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FC - chip8 super instruction
             if(opcode == 0x00FC)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
@@ -427,7 +505,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FD - chip8 super instruction
             if(opcode == 0x00FD)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
@@ -437,7 +515,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                superChip8Mode = true;
+                
                 hiResMode = false;
                 //todo later
 
@@ -446,9 +524,10 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FF - chip8 super instruction
             if(opcode == 0x00FF)
             {
-                superChip8Mode = true;
+                //checkme
+                
                 hiResMode = true;
-                //todo later
+                PC += 2;
 
             }
             
@@ -477,10 +556,15 @@ void cpuLoop(Uint8* data, uint32_t size)
 
             }
 
+            else if(opcode == 0x0000)
+            {
+                PC += 2;
+            }
+
             //0x00CN - superchip 8 instruction
             else if(byteFirst == 0x00 && numThird == 0xC)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
@@ -690,7 +774,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //DXY0 - superchip 8 instruction
             else if(numFirst == 0xD && numLast == 0x0)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
@@ -872,7 +956,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX30 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x30)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
@@ -937,7 +1021,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX75 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x75)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
@@ -945,7 +1029,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX85 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x85)
             {
-                superChip8Mode = true;
+                
                 //todo later
 
             }
