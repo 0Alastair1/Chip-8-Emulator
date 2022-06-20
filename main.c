@@ -309,6 +309,13 @@ void cpuLoop(Uint8* data, uint32_t size)
     SDL_Renderer* renderer;
 
     Uint8 screen[width_s][height_s];
+    for (size_t i = 0; i < width_s; i++)
+    {   
+        for (size_t ii = 0; ii < height_s; ii++)
+        {
+            screen[i][ii] = 0;
+        }
+    }
 
     //copy file data to memory
     if(size + 1024 < 8192)
@@ -348,9 +355,8 @@ void cpuLoop(Uint8* data, uint32_t size)
     bool superChip8Mode = false;
     bool hiResMode = false;
     
-
-    Uint8 pixels[Width][Height];
-
+    
+    Uint8 currentKeyPressed = 255;
     Uint16 opcode;
 
     //initialize SDL and store the result
@@ -367,11 +373,11 @@ void cpuLoop(Uint8* data, uint32_t size)
         //fetch opcode
         if(isLittleEndian)
         {
-            opcode = swap_16(*(Uint16*)&memory[PC]);
+            opcode = swap_16( (*(Uint16*)&memory[PC]) & 0xFFFF);
         }
         else
         {
-            opcode = *(Uint16*)&memory[PC];
+            opcode = (*(Uint16*)&memory[PC] & 0xFFFF);
         }
 
         printf("%04x %04x\n", opcode, PC);
@@ -637,8 +643,13 @@ void cpuLoop(Uint8* data, uint32_t size)
             //BNNN
             else if(numFirst == 0xB)
             {
-                PC = nnn + V[0];
-                //fixme
+                if(!superChip8Mode)
+                {
+                    PC = nnn + V[0];
+                }
+                else{
+                    PC = nnn + V[x];
+                }
             }
 
             //CXNN
@@ -765,15 +776,37 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX0A
             else if(numFirst == 0xF && byteLast == 0x0A)
             {
-                for(size_t i = 0; i < 16; i++)
+                /* broken
+                //original behavior, fixme for superchip
+                if(currentKeyPressed == 255)
+                {
+                    for(size_t i = 0; i < 16; i++)
+                    {
+                        if(keyboard.keyboard >> i & 0x1)
+                        {
+                            currentKeyPressed = i;
+                        }
+                    }
+                }
+                else{
+                    if(!(keyboard.keyboard >> currentKeyPressed & 0x1))
+                    {
+                        PC += 2;
+                        V[x] = currentKeyPressed;
+                        currentKeyPressed = 255;
+                        break;
+                    }
+                }
+                */
+               for(size_t i = 0; i < 16; i++)
                 {
                     if(keyboard.keyboard >> i & 0x1)
                     {
                         PC += 2;
                         V[x] = i;
-                        break;
                     }
                 }
+                
             }
 
             //FX15
@@ -797,6 +830,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
+                V[0xF] = (I + V[x]) > 0xFFF ? 1 : 0; //qwerk
                 I += V[x];
             }
 
@@ -820,7 +854,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             else if(numFirst == 0xF && byteLast == 0x33)
             {
                 PC += 2;
-
+                //checkme
                 memory[I] = (V[x] / 100) % 10;
                 memory[I + 1] = (V[x] / 10) % 10;
                 memory[I + 2] = (V[x] / 1) % 10;
@@ -844,10 +878,21 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                for(int ii = 0; ii <= x; ii++)
+                if(!superChip8Mode)
                 {
-                    V[ii] = memory[I + ii];
+                    for(I = I; I <= x; I++)
+                    {
+                        V[I] = memory[I];
+                    }
+                    I = x + 1;
                 }
+                else{
+                    for(int ii = 0; ii <= x; ii++)
+                    {
+                        V[ii] = memory[I + ii];
+                    }
+                }
+                
 
             }
 
@@ -971,7 +1016,7 @@ struct file readFile(char* filepath)
     free(filepath);
 
     fseek(fp, 0, SEEK_END);
-    file.size = ftell(fp);
+    file.size = ftell(fp) + 1;
 
     Uint8* fileContent = malloc(file.size) + 1;
 
