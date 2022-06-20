@@ -7,6 +7,6 @@ add_subdirectory(Vendor/SDL2)
 
 add_executable(Chip-8-Emulator main.c)
 
-include_directories(Chip-8-Emulator PRIVATE Vendor/SDL2/include Vendor/portablefiledialogs/ )
+include_directories(Chip-8-Emulator PRIVATE Vendor/SDL2/include Vendor/tinyfd/ )
 
 target_link_libraries(Chip-8-Emulator SDL2-static)

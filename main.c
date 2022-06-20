@@ -32,14 +32,14 @@
 #include <string.h>
 #include <locale.h>
 
-
+#include "Vendor/tinyfd/tinyfiledialogs.h"
 #include <SDL2/SDL.h>
 
 #define Uint8 uint8_t
 #define Uint16 uint16_t
 #define Uint32 uint32_t
 #define Uint64 uint64_t
-
+#define Uint128 uint128_t
 
 #define x (opcode & 0x0F00) >> 8
 #define y (opcode & 0x00F0) >> 4
@@ -59,8 +59,6 @@ inline bool isLittleEndian()
     return *(Uint8*)&val == 0xFF;
 }
 
-
-
 struct file{
     Uint8* data;
     uint32_t size;
@@ -73,19 +71,42 @@ struct strangeTypeSizes
         Uint16 i: 12;
     };
     
-}typeSizesStruct;
-#define i (typeSizesStruct.i)
+};
+#define I (typeSizesStruct.i)
+
 
 //https://en.wikipedia.org/wiki/CHIP-8
 //http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 //https://tobiasvl.github.io/blog/write-a-chip-8-emulator
 //http://johnearnest.github.io/Octo/docs/SuperChip.html
+//https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/
+//http://www.emulator101.com/chip-8-sprites.html
 
 
 void cpuLoop(Uint8*, uint32_t);
 char* openFile();
 struct file readFile(char*);
 
+
+#define width_s 128
+#define height_s 64
+#define scale 5
+
+#pragma push()
+#pragma pack(1)
+union
+{
+    Uint16 keyboard;
+
+    struct PACKED
+    {
+        Uint8 key1: 1; Uint8 key2: 1; Uint8 key3: 1; Uint8 keyC: 1;
+        Uint8 key4: 1; Uint8 key5: 1; Uint8 key6: 1; Uint8 keyD: 1;
+        Uint8 key7: 1; Uint8 key8: 1; Uint8 key9: 1; Uint8 keyE: 1;
+        Uint8 keyA: 1; Uint8 key0: 1; Uint8 keyB: 1; Uint8 keyF: 1;
+    } keys;
+} keyboard;
+#pragma pop()
 
 int main(int argc, char const *argv[])
 {
@@ -96,21 +117,142 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
+
+void initSDL(SDL_Window** window, SDL_Renderer** renderer)
+{
+    SDL_Init(SDL_INIT_VIDEO);
+    *window = SDL_CreateWindow("Chip-8 Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_s * scale, height_s * scale, SDL_WINDOW_SHOWN);
+    *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
+
+    return;
+}
+
+
+void inputs()
+{
+    keyboard.keyboard = 0;
+
+    SDL_Event event;
+    while(SDL_PollEvent(&event))
+    {
+        if(event.type == SDL_QUIT)
+            exit(0);
+        
+
+        if(event.type == SDL_KEYDOWN)
+        {
+            switch(event.key.keysym.sym)
+            {
+                case SDLK_1:
+                    keyboard.keys.key1 = 1;
+                    break;
+
+                case SDLK_2:
+                    keyboard.keys.key2 = 1;
+                    break;
+                
+                case SDLK_3:
+                    keyboard.keys.key3 = 1;
+                    break;
+                    
+                case SDLK_4:
+                    keyboard.keys.keyC = 1;
+                    break;
+
+                case SDLK_q:
+                    keyboard.keys.key4 = 1;
+                    break;
+
+                case SDLK_w:
+                    keyboard.keys.key5 = 1;
+                    break;
+
+                case SDLK_e:
+                    keyboard.keys.key6 = 1;
+                    break;
+
+                case SDLK_r:
+                    keyboard.keys.keyD = 1;
+                    break;
+
+                case SDLK_a:
+                    keyboard.keys.key7 = 1;
+                    break;
+
+                case SDLK_s:
+                    keyboard.keys.key8 = 1;
+                    break;
+
+                case SDLK_d:
+                    keyboard.keys.key9 = 1;
+                    break;
+                
+                case SDLK_f:
+                    keyboard.keys.keyE = 1;
+                    break;
+
+                case SDLK_z:
+                    keyboard.keys.keyA = 1;
+                    break;
+
+                case SDLK_x:
+                    keyboard.keys.key0 = 1;
+                    break;
+
+                case SDLK_c:
+                    keyboard.keys.keyB = 1;
+                    break;
+
+                case SDLK_v:
+                    keyboard.keys.keyF = 1;
+                    break;
+
+                case SDLK_ESCAPE:
+                    exit(0);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+}
+
 void cpuLoop(Uint8* data, uint32_t size)
 {
-    Uint8 PC;
+    Uint16 PC;
     Uint8 SP;
-    Uint8* memory = alloca(4096);
+    Uint8* memory;
     Uint8 V[16];
     Uint16 stack[32];
     Uint8 delayTimer;
     Uint8 soundTimer;
+    struct strangeTypeSizes typeSizesStruct;
+    bool ETI660Mode = false;
+
+    Uint8 screen[width_s][height_s];
 
     //copy file data to memory
-    memcpy(memory, data, size);
+    if(size + 1024 < 8192)
+    {
+        memory = alloca(size + 1024);
+    }
+    else
+    {
+        memory = malloc(size + size/2);
+    }
+    
+    if(!ETI660Mode)
+    {
+        memcpy(memory+0x200, data, size);
+        PC = (Uint16)0x200;
+    }
+    else
+    {
+        memcpy(memory+0x600, data, size);
+        PC = (Uint16)0x600;
+    }
 
-    //starting at 0x00
-    PC = 0x00;
     SP = 0x00;
     
 
@@ -125,11 +267,20 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     Uint8 Width = 128;
     Uint8 Height = 64;
-    bool chip8SuperMode;
+    bool superChip8Mode = false;
+    bool hiResMode = false;
+    
 
     Uint8 pixels[Width][Height];
 
     Uint16 opcode;
+
+    //initialize SDL and store the result
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    initSDL(&window, &renderer);
+    SDL_ShowWindow(window);
+
 
     //cpu loop
     while (true)
@@ -152,7 +303,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FB - chip8 super instrcution
             if(opcode == 0x00FB)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -160,7 +311,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FC - chip8 super instruction
             if(opcode == 0x00FC)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -168,7 +319,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FD - chip8 super instruction
             if(opcode == 0x00FD)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -176,7 +327,10 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FE - chip8 super instruction
             if(opcode == 0x00FE)
             {
-                chip8SuperMode = true;
+                PC += 2;
+
+                superChip8Mode = true;
+                hiResMode = false;
                 //todo later
 
             }
@@ -184,7 +338,8 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00FF - chip8 super instruction
             if(opcode == 0x00FF)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
+                hiResMode = true;
                 //todo later
 
             }
@@ -193,8 +348,15 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00E0
             if(opcode == 0x00E0)
             {
-                //todo later
-
+                PC += 2;
+                
+                for (size_t i = 0; i < width_s; i++)
+                {   
+                    for (size_t ii = 0; ii < height_s; ii++)
+                    {
+                        screen[i][ii] = 0;
+                    }
+                }
             }
 
             //0x00EE
@@ -208,7 +370,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0x00CN - superchip 8 instruction
             else if(byteFirst == 0x00 && numThird == 0xC)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -380,7 +542,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                i = nnn;
+                I = nnn;
             }
 
             //BNNN
@@ -403,7 +565,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //DXY0 - superchip 8 instruction
             else if(numFirst == 0xD && numLast == 0x0)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -412,8 +574,74 @@ void cpuLoop(Uint8* data, uint32_t size)
             //DXYN
             else if(numFirst == 0xD)
             {
-                //todo later
+                PC += 2;
 
+                V[0xF] = 0;
+
+                //render sprite
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+       
+
+                //draw sprite from memory
+
+                //foreach line/byte
+                for(size_t row = 0; row < n; row++)
+                {
+                    //foreach pixel/bit in line
+                    for(size_t col = 0; col < 8; col++)
+                    {
+                        //checks if the bit at index col in the byte is set
+                        if( (memory[I + row] >> (7 - col)) & 0x1 ) {
+
+                            //check if pixel is out of bounds
+                            if(superChip8Mode) { //if out of bounds of 128 64 screen
+                               //if row of sprite goes out below screen stop drawing sprite
+                                if( (V[y] + row) >= 64) {
+                                    goto spriteBreak;
+                                }
+                                //if the pixel goes out of bounds go to next row
+                                else if( (V[x] + col) >= 128) {
+                                    goto rowBreak;
+                                }
+                                //if current row is out of bounds go to next row
+                                else if( (V[y] + row) < 0) {
+                                    goto rowBreak;
+                                }
+                                //if the current pixel is out of bounds go to next pixel
+                                else if( (V[x] + col) < 0) {
+                                    continue;
+                                }
+                            } else { //the same but 64 32 size screen
+                                if( (V[y] + row) >= 32) {
+                                    goto spriteBreak;
+                                }
+                                else if( (V[x] + col) >= 64) {
+                                    goto rowBreak;
+                                }
+                                else if( (V[y] + row) < 0) {
+                                    goto rowBreak;
+                                }
+                                else if( (V[x] + col) < 0) {
+                                    continue;
+                                }
+                            }
+                            
+                            //xor
+                            //check if pixel is already set
+                            if(screen[V[x] + col][V[y] + row] == 1)
+                            {
+                                V[0xF] = 1;
+                                screen[V[x] + col][V[y] + row] = 0;
+                            }
+                            else
+                            {
+                                screen[V[x] + col][V[y] + row] = 1;
+                            }
+                        }
+                    }
+                    rowBreak:
+                }
+                spriteBreak:
             }
 
             //EX9E
@@ -466,7 +694,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                i += V[x];
+                I += V[x];
             }
 
             //FX29
@@ -479,7 +707,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX30 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x30)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -489,9 +717,9 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                memory[i] = (V[x] / 100) % 10;
-                memory[i + 1] = (V[x] / 10) % 10;
-                memory[i + 2] = (V[x] / 1) % 10;
+                memory[I] = (V[x] / 100) % 10;
+                memory[I + 1] = (V[x] / 10) % 10;
+                memory[I + 2] = (V[x] / 1) % 10;
 
             }
 
@@ -502,7 +730,7 @@ void cpuLoop(Uint8* data, uint32_t size)
 
                 for(int ii = 0; ii <= x; ii++)
                 {
-                    memory[i + ii] = V[ii];
+                    memory[I + ii] = V[ii];
                 }
 
             }
@@ -514,7 +742,7 @@ void cpuLoop(Uint8* data, uint32_t size)
 
                 for(int ii = 0; ii <= x; ii++)
                 {
-                    V[ii] = memory[i + ii];
+                    V[ii] = memory[I + ii];
                 }
 
             }
@@ -522,7 +750,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX75 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x75)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -530,7 +758,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX85 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x85)
             {
-                chip8SuperMode = true;
+                superChip8Mode = true;
                 //todo later
 
             }
@@ -541,7 +769,46 @@ void cpuLoop(Uint8* data, uint32_t size)
             }
         }
 
+        //GPU
+        int scaled = scale;
+        //check if super mode is enabled
+        //if 64 32 aka not super chip scale to 128 64
+        if(!hiResMode)
+        {
+            scaled = scale * 2;
+        }    
 
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        //pixel color
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+        for(int row = 0; row < 64; row++)
+        {
+            for(int col = 0; col < 128; col++)
+            {
+                if(screen[col][row] == 1)
+                {
+                    //draw pixel
+                    SDL_Rect rect = { col * scaled, row * scaled, scaled, scaled};
+                    SDL_RenderFillRect(renderer, &rect);
+                }
+            }
+        }
+        SDL_RenderPresent(renderer);
+
+
+
+        //decrement timers
+        if(delayTimer > 0)
+        delayTimer--;
+
+        if(soundTimer > 0)
+            soundTimer--;
+        
+        //input handling
+        inputs();
         
     }
 
