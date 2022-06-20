@@ -368,8 +368,9 @@ void cpuLoop(Uint8* data, uint32_t size)
     while (true)
     {
 
-        //sleep
+        //sleep fixme
         SDL_Delay(10);
+
         //fetch opcode
         if(isLittleEndian)
         {
@@ -450,6 +451,8 @@ void cpuLoop(Uint8* data, uint32_t size)
                 PC = stack[SP];
                 SP--;
 
+                PC += 2;//
+
             }
 
             //0x00CN - superchip 8 instruction
@@ -479,6 +482,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 SP += 1;
                 stack[SP] = PC;
+
                 PC = nnn;
             }
 
@@ -657,7 +661,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[x] = (rand() % 0xFF) & kk;
+                V[x] = (rand() % 0xFF + 1) & kk;
 
             }
 
@@ -882,14 +886,14 @@ void cpuLoop(Uint8* data, uint32_t size)
                 {
                     for(I = I; I <= x; I++)
                     {
-                        V[I] = memory[I];
+                        V[I] = memory[I] & 0xFF;
                     }
                     I = x + 1;
                 }
                 else{
                     for(int ii = 0; ii <= x; ii++)
                     {
-                        V[ii] = memory[I + ii];
+                        V[ii] = memory[I + ii] & 0xFF;
                     }
                 }
                 
