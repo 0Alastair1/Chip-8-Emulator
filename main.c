@@ -568,10 +568,23 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                //fixme
-                
-                
+                //check me
+                for (size_t i = height_s; i > 0; i--)
+                {   
+                    if(height_s - n < 0)
+                    {
+                        for (size_t ii = 0; ii < width_s; ii++)
+                        {
+                            screen[ii][i] = 0;
+                        }
+                         
+                    }
 
+                    for (size_t ii = 0; ii < width_s; ii++)
+                    {
+                        screen[ii][i] = screen[ii][i-n];
+                    }   
+                }
             }
 
 
