@@ -45,6 +45,7 @@
 #define y (opcode & 0x00F0) >> 4
 #define n (opcode & 0x000F)
 #define kk (opcode & 0x00FF)
+#define nn kk
 #define nnn (opcode & 0x0FFF)
 #define numFirst (opcode & 0xF000) >> 12
 #define numSecond x
@@ -69,6 +70,10 @@ struct strangeTypeSizes
     struct
     {
         Uint16 i: 12;
+        bool blue: 1;
+        bool black: 1;
+        bool green: 1;
+        bool red: 1;
     };
     
 };
@@ -81,6 +86,7 @@ struct strangeTypeSizes
 //http://johnearnest.github.io/Octo/docs/SuperChip.html
 //https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/
 //http://www.emulator101.com/chip-8-sprites.html
+//https://github.com/trapexit/chip-8_documentation/blob/master/README.md
 
 //font
 const Uint8 font[80] = {
@@ -374,8 +380,24 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     Uint8 Width = 128;
     Uint8 Height = 64;
-    bool superChip8Mode = false;
-    bool hiResMode = false;
+
+    bool sChip8Mode = false;
+
+    bool chip8HdMode = false;
+
+    bool chip10Mode = false;
+
+    bool chip8IMode = false;
+
+    bool chip8EMode = false;
+
+    bool chip8XMode = false;
+
+    bool mode3232 = false;
+    bool mode6464 = false;
+    bool mode12864 = false;
+    bool iToggle = false;
+    
     
     
     Uint8 currentKeyPressed = 255;
@@ -385,88 +407,26 @@ void cpuLoop(Uint8* data, uint32_t size)
     initSDL(&window, &renderer);
     SDL_ShowWindow(window);
 
-    //search through memory for superchip opcodes,set the superchip mode to true if found and break
-    SP += 1;
-    stack[SP] = PC;
-    for(size_t i = 0; i < size; i+=2)
+    //fixme get flags from user input
+
+    //configure chip8 versions according to flags
+    if(sChip8Mode)
+    {   //im guessing super chip doesnt start in high res
+        mode12864 = false;
+    }
+
+    if(chip10Mode)
     {
-        PC = (Uint16)i;
+        mode12864 = true;
+    }
 
-        printf("%04x %04x\n", opcode, PC);
-
-        if(isLittleEndian)
-        {
-            opcode = swap_16( (*(Uint16*)&memory[PC]) & 0xFFFF);
-        }
-        else
-        {
-            opcode = (*(Uint16*)&memory[PC] & 0xFFFF);
-        }
-
-        if(opcode == 0x00FB)
-        {
-            superChip8Mode = true;
-            break;
-        }
-
-        else if(opcode == 0x00FC)
-        {
-            superChip8Mode = true;
-            break;
-        }
-        else if(opcode == 0x00FD)
-        {
-            superChip8Mode = true;
-            break;
-        }
-        else if(opcode == 0x00FE)
-        {
-            superChip8Mode = true;
-            break;
-        }
-        else if(opcode == 0x00FF)
-        {
-            superChip8Mode = true;
-            break;
-        }
-
-        else if(byteFirst == 0x00 && numThird == 0xC)
-        {
-            superChip8Mode = true;
-            break;
-        }
-
-        else if(numFirst == 0xD && numLast == 0x0)
-        {
-            superChip8Mode = true;
-            break;
-        }
-
-        else if(numFirst == 0xF && byteLast == 0x30)
-        {
-            superChip8Mode = true;
-            break;
-        }
-
-        else if(numFirst == 0xF && byteLast == 0x75)
-        {
-            superChip8Mode = true;
-            break;
-        }
-
-        else if(numFirst == 0xF && byteLast == 0x85)
-        {
-            superChip8Mode = true;
-            break;
-        }
-
-
-
-    } 
-    PC = stack[SP];
-    SP--;
+    if(chip8HdMode)
+    {
+        mode3232 = true;
+    }
 
     //cpu loop
+    //todo - check conflics caused by overlapping instructions
     while (true)
     {
 
@@ -488,54 +448,40 @@ void cpuLoop(Uint8* data, uint32_t size)
         //decode and execute opcode
 
         {
-            //0x00FB - chip8 super instrcution
-            if(opcode == 0x00FB)
+            //001N - aditional
+            if(byteFirst == 0x00 && numThird == 0x1)
             {
-                
-                //todo later
-
-            }
-            
-            //0x00FC - chip8 super instruction
-            if(opcode == 0x00FC)
-            {
-                
-                //todo later
-
+                exit(n);
             }
 
-            //0x00FD - chip8 super instruction
-            if(opcode == 0x00FD)
-            {
-                
-                //todo later
-
-            }
-
-            //0x00FE - chip8 super instruction
-            if(opcode == 0x00FE)
+            //0x00CN - superchip 8 instruction
+            //move each pixel in screen down by n pixels
+            else if(byteFirst == 0x00 && numThird == 0xC && sChip8Mode)
             {
                 PC += 2;
 
-                
-                hiResMode = false;
-                //todo later
-
+                //check me
+                for (size_t i = height_s; i > 0; i--)
+                {   
+                    if(height_s - n < 0)
+                    {
+                        for (size_t ii = 0; ii < width_s; ii++)
+                        {
+                            screen[ii][i] = 0;
+                        }
+                         
+                    }
+                    else{
+                        for (size_t ii = 0; ii < width_s; ii++)
+                        {
+                            screen[ii][i] = screen[ii][i-n];
+                        }
+                    }   
+                }
             }
-
-            //0x00FF - chip8 super instruction
-            if(opcode == 0x00FF)
-            {
-                //checkme
-                
-                hiResMode = true;
-                PC += 2;
-
-            }
-            
 
             //0x00E0
-            if(opcode == 0x00E0)
+            else if(opcode == 0x00E0)
             {
                 PC += 2;
                 
@@ -553,49 +499,134 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC = stack[SP];
                 SP--;
+            
+            }
+
+            else if(opcode == 0x00FA) //
+            {
+                PC += 2;
+
+                iToggle = !iToggle;
+                break;
+            }
+            //0x00FB - chip8 super instrcution
+            else if(opcode == 0x00FB && sChip8Mode)
+            {
+                PC += 2;
+
+                //scroll display 4 pixels to the right
+                for(size_t i = 0; i < width_s; i++)
+                {
+                    if(i - 4 <= 0)
+                    {
+                        for(size_t ii = 0; ii < height_s; ii++)
+                        {
+                            screen[i][ii] = 0;
+                        }
+                    }
+                    else
+                    {
+                        for(size_t ii = 0; ii < height_s; ii++)
+                        {
+                            screen[i][ii] = screen[i-4][ii];
+                        }
+                    }
+                }
+            }
+            
+            //0x00FC - chip8 super instruction
+            else if(opcode == 0x00FC && sChip8Mode)
+            {
+                PC += 2;
+
+                //scroll display 4 pixels to the left
+                for(size_t i = 0; i < width_s; i++)
+                {
+                    if(i + 4 >= width_s)
+                    {
+                        for(size_t ii = 0; ii < height_s; ii++)
+                        {
+                            screen[i][ii] = 0;
+                        }
+                    }
+                    else
+                    {
+                        for(size_t ii = 0; ii < height_s; ii++)
+                        {
+                            screen[i][ii] = screen[i+4][ii];
+                        }
+                    }
+                    
+                }
 
             }
 
+            //0x00FD - chip8 super instruction
+            else if(opcode == 0x00FD && sChip8Mode)
+            {
+                exit(0);
+            }
+
+            //0x00FE - chip8 super instruction
+            else if(opcode == 0x00FE && sChip8Mode)
+            {
+                PC += 2;
+
+                
+                mode12864 = false;
+                //todo later
+
+            }
+
+            //0x00FF - chip8 super instruction
+            else if(opcode == 0x00FF && sChip8Mode)
+            {
+                //checkme
+                PC += 2;
+
+                mode12864 = true;
+            }
+            
+            /*
             else if(opcode == 0x0000)
             {
                 PC += 2;
             }
+            */
 
-            //0x00CN - superchip 8 instruction
-
-            //move each pixel in screen down by n pixels
-            else if(byteFirst == 0x00 && numThird == 0xC)
+           //0x02A0 - extended
+            else if(opcode == 0x02A0 && chip8XMode)
             {
-                PC += 2;
-
-                //check me
-                for (size_t i = height_s; i > 0; i--)
-                {   
-                    if(height_s - n < 0)
-                    {
-                        for (size_t ii = 0; ii < width_s; ii++)
-                        {
-                            screen[ii][i] = 0;
-                        }
-                         
-                    }
-
-                    for (size_t ii = 0; ii < width_s; ii++)
-                    {
-                        screen[ii][i] = screen[ii][i-n];
-                    }   
+                //PC += 2;
+                
+                if(typeSizesStruct.blue == true)
+                {
+                    typeSizesStruct.blue = false;
+                    typeSizesStruct.black = true;
+                }
+                else if(typeSizesStruct.black == true)
+                {
+                    typeSizesStruct.black = false;
+                    typeSizesStruct.green = true;
+                }
+                else if(typeSizesStruct.green == true)
+                {
+                    typeSizesStruct.green = false;
+                    typeSizesStruct.red = true;
+                }
+                else if(typeSizesStruct.red == true)
+                {
+                    typeSizesStruct.red = false;
+                    typeSizesStruct.blue = true;
                 }
             }
-
 
             //0NNN - checkme
             else if(numFirst == 0x0)
             {
-                //001N -
-                if(byteFirst == 0x00 && numThird == 0x1)
-                {
-                    exit(n);
-                }
+                //PC += 2;
+                //
+
                 //todo later
 
             }
@@ -650,7 +681,36 @@ void cpuLoop(Uint8* data, uint32_t size)
                 }
 
             }
+
+            //5XY1
+            else if(numFirst == 0x5 && numLast == 0x1 && chip8EMode)
+            {
+                
+                //todo later
+            }
+
+            //5XY1
+            else if(numFirst == 0x5 && numLast == 0x1 && chip8XMode)
+            {
+                
+                //todo later
+            }
+
+            //5XY2
+            else if(numFirst == 0x5 && numLast == 0x2 && chip8EMode)
+            {
+                PC += 2;
+                //todo later
+            }
+                
             
+            //5XY3
+            else if(numFirst == 0x5 && numLast == 0x3 && chip8EMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
             //6XNN
             else if(numFirst == 0x6)
             {
@@ -724,7 +784,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                if(!superChip8Mode)
+                if(!sChip8Mode)
                 {
                     V[x] = V[y];
                 }
@@ -747,7 +807,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                if(!superChip8Mode)
+                if(!sChip8Mode)
                 {
                     V[x] = V[y];
                 }
@@ -767,6 +827,41 @@ void cpuLoop(Uint8* data, uint32_t size)
                 }
             }
 
+            //9XY1
+            else if(numFirst == 0x9 && numLast == 0x1 && chip8EMode)
+            {
+                PC += 2;
+                
+                //check me
+                V[0xF] = (V[x] * V[y]) >> 8;
+                V[x] = V[x] * V[y];
+
+            }
+
+            //9XY2 - extended
+            else if(numFirst == 0x9 && numLast == 0x2 && chip8EMode)
+            {
+                PC += 2;
+
+                V[0xF] = V[x] % V[y];
+                V[x] = V[x] / V[y];
+            }
+
+            //9XY3 - extended
+            else if(numFirst == 0x9 && numLast == 0x3 && chip8EMode)
+            {
+                PC += 2;
+                
+                //check me/fixme
+                Uint16 temp = V[x] << 8 | V[y];
+
+                memory[I] = (temp / 10000) % 10;
+                memory[I + 1] = (temp / 1000) % 10;
+                memory[I + 2] = (temp / 100) % 10;
+                memory[I + 3] = (temp / 10) % 10;
+                memory[I + 4] = (temp / 1) % 10;
+            }
+
             //ANNN
             else if(numFirst == 0xA)
             {
@@ -775,16 +870,53 @@ void cpuLoop(Uint8* data, uint32_t size)
                 I = nnn;
             }
 
+            //B0NN
+            else if(byteFirst == 0xB && chip8IMode)
+            {
+                PC += 2;
+
+                //todo later
+            }
+
+            //B1Y0
+            else if(byteFirst == 0xB1 && numLast == 0x0 && chip8IMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
+            //B1Y1
+            else if(byteFirst == 0xB1 && numLast == 0x1 && chip8IMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
+            //BXY0 - extended 
+            else if(numFirst == 0xB && n == 0x0 && chip8XMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
+            //BXYN
+            else if(numFirst == 0xB && chip8XMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
             //BNNN
             else if(numFirst == 0xB)
             {
-                if(!superChip8Mode)
+                if(!sChip8Mode)
                 {
                     PC = nnn + V[0];
                 }
                 else{
                     PC = nnn + V[x];
                 }
+                
             }
 
             //CXNN
@@ -796,12 +928,12 @@ void cpuLoop(Uint8* data, uint32_t size)
 
             }
 
-            //DXY0 - superchip 8 instruction
-            else if(numFirst == 0xD && numLast == 0x0)
+            //DXY0
+            else if(numFirst == 0xD && numLast == 0x0 && sChip8Mode)
             {
                 PC += 2;
                 
-
+                //todo later
 
             }
 
@@ -829,7 +961,7 @@ void cpuLoop(Uint8* data, uint32_t size)
                         if( (memory[I + row] >> (7 - col)) & 0x1 ) {
 
                             //check if pixel is out of bounds
-                            if(superChip8Mode) { //if out of bounds of 128 64 screen
+                            if(sChip8Mode) { //if out of bounds of 128 64 screen
                                //if row of sprite goes out below screen stop drawing sprite
                                 if( (V[y] + row) >= 64) {
                                     goto spriteBreak;
@@ -899,6 +1031,20 @@ void cpuLoop(Uint8* data, uint32_t size)
                 {
                     PC += 2;
                 }
+            }
+
+            //EXF2
+            else if(numFirst == 0xE && byteLast == 0xF2)
+            {
+                PC += 2;
+                //todo later
+            }
+
+            //EXF5
+            else if(numFirst == 0xE && byteLast == 0xF5)
+            {
+                PC += 2;
+                //todo later
             }
 
             //FX07
@@ -980,7 +1126,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             }
 
             //FX30 - superchip 8 instruction
-            else if(numFirst == 0xF && byteLast == 0x30)
+            else if(numFirst == 0xF && byteLast == 0x30 && sChip8Mode)
             {
                 
                 //todo later
@@ -1003,7 +1149,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                if(!superChip8Mode)
+                if((!sChip8Mode) || iToggle)
                 {
                     for(I = I; I <= x; I++)
                     {
@@ -1026,7 +1172,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                if(!superChip8Mode)
+                if((!sChip8Mode) || iToggle)
                 {
                     for(I = I; I <= x; I++)
                     {
@@ -1044,20 +1190,48 @@ void cpuLoop(Uint8* data, uint32_t size)
 
             }
 
-            //FX75 - superchip 8 instruction
-            else if(numFirst == 0xF && byteLast == 0x75)
+            //FX75
+            else if(numFirst == 0xF && byteLast == 0x75 && chip8EMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
+            //FX75
+            else if(numFirst == 0xF && byteLast == 0x75 && sChip8Mode)
             {
                 PC += 2;
                 //todo later
 
             }
 
-            //FX85 - superchip 8 instruction
-            else if(numFirst == 0xF && byteLast == 0x85)
+            //FX85
+            else if(numFirst == 0xF && byteLast == 0x85 && sChip8Mode)
             {
                 PC += 2;   
                 //todo later
 
+            }
+
+            //FX94
+            else if(numFirst == 0xF && byteLast == 0x94 && chip8EMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
+            //FXFB
+            else if(numFirst == 0xF && byteLast == 0xFB && chip8XMode)
+            {
+                PC += 2;
+                //todo later
+            }
+
+            //FXF8
+            else if(numFirst == 0xF && byteLast == 0xF8 && chip8XMode)
+            {
+                PC += 2;
+                //todo later
             }
 
             else
@@ -1070,12 +1244,32 @@ void cpuLoop(Uint8* data, uint32_t size)
         int scaled = scale;
         //check if super mode is enabled
         //if 64 32 aka not super chip scale to 128 64
-        if(!hiResMode)
+        //fixme handle other display modes
+        if(!mode12864)
         {
             scaled = scale * 2;
         }    
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        if(typeSizesStruct.blue)
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+        }
+        else if(typeSizesStruct.black)
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        }
+        else if(typeSizesStruct.green)
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        }
+        else if(typeSizesStruct.red)
+        {
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        }
+        else{
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        }
+        
         SDL_RenderClear(renderer);
 
         //pixel color
@@ -1127,7 +1321,7 @@ char* openFile()
         ofn.Flags           = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
     #else
-        //no gui D:
+        //no gui D:fixme
         printf("Please enter the filepath: ");
         #ifdef __STDC_LIB_EXT1__
             scanf_s("%s", filepath, 64);
