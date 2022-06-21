@@ -392,6 +392,8 @@ void cpuLoop(Uint8* data, uint32_t size)
     {
         PC = (Uint16)i;
 
+        printf("%04x %04x\n", opcode, PC);
+
         if(isLittleEndian)
         {
             opcode = swap_16( (*(Uint16*)&memory[PC]) & 0xFFFF);
@@ -700,7 +702,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[0xF] = (V[x] > V[y]) ? 1 : 0;
+                V[0xF] = (V[y] > V[x]) ? 0 : 1;
                 V[x] = V[x] - V[y];
             }
 
@@ -723,7 +725,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[0xF] = (V[y] > V[x]) ? 1 : 0;
+                V[0xF] = (V[x] > V[y]) ? 0 : 1;
                 V[x] = V[y] - V[x];
             }
 
@@ -1032,7 +1034,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX75 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x75)
             {
-                
+                PC += 2;
                 //todo later
 
             }
@@ -1040,7 +1042,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //FX85 - superchip 8 instruction
             else if(numFirst == 0xF && byteLast == 0x85)
             {
-                
+                PC += 2;   
                 //todo later
 
             }
