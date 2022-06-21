@@ -552,8 +552,6 @@ void cpuLoop(Uint8* data, uint32_t size)
                 PC = stack[SP];
                 SP--;
 
-                PC += 2;//
-
             }
 
             else if(opcode == 0x0000)
@@ -562,10 +560,15 @@ void cpuLoop(Uint8* data, uint32_t size)
             }
 
             //0x00CN - superchip 8 instruction
+
+            //move each pixel in screen down by n pixels
             else if(byteFirst == 0x00 && numThird == 0xC)
             {
+                PC += 2;
+
+                //fixme
                 
-                //todo later
+                
 
             }
 
@@ -573,6 +576,11 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0NNN - checkme
             else if(numFirst == 0x0)
             {
+                //001N -
+                if(byteFirst == 0x00 && numThird == 0x1)
+                {
+                    exit(n);
+                }
                 //todo later
 
             }
@@ -586,6 +594,8 @@ void cpuLoop(Uint8* data, uint32_t size)
             //2NNN
             else if(numFirst == 0x2)
             {
+                PC += 2;
+
                 SP += 1;
                 stack[SP] = PC;
 
@@ -774,8 +784,9 @@ void cpuLoop(Uint8* data, uint32_t size)
             //DXY0 - superchip 8 instruction
             else if(numFirst == 0xD && numLast == 0x0)
             {
+                PC += 2;
                 
-                //todo later
+
 
             }
 
