@@ -5,3 +5,6 @@
 [submodule "Vendor/tinyfd"]
 	path = Vendor/tinyfd
 	url = http://git.code.sf.net/p/tinyfiledialogs/code
+[submodule "Vendor/kiwi"]
+	path = Vendor/kiwi
+	url = https://github.com/mobius3/KiWi
