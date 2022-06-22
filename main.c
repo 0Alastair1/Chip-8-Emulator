@@ -1,5 +1,5 @@
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
     #include <malloc.h>
     #define swap_16(x) _byteswap_ushort(x)
@@ -7,13 +7,27 @@
     #define swap_64(x) _byteswap_uint64(x)
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__unix__)
     #include <byteswap.h>
     #include <alloca.h>
     #define swap_16(x) bswap_16(x)
     #define swap_32(x) bswap_32(x)
     #define swap_64(x) bswap_64(x)
+#endif
 
+#if defined(__APPLE__)
+    #include <libkern/OSByteOrder.h>
+    #define swap_16(x) OSSwapInt16(x)
+    #define swap_32(x) OSSwapInt32(x)
+    #define swap_64(x) OSSwapInt64(x)
+#endif
+
+#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__sun__)
+    #include <sys/types.h>
+    #include <sys/endian.h>
+    #define swap_16(x) swap16(x)
+    #define swap_32(x) swap32(x)
+    #define swap_64(x) swap64(x)
 #endif
 
 #if defined(__GNUC__)
