@@ -87,6 +87,7 @@ struct strangeTypeSizes
 //https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/
 //http://www.emulator101.com/chip-8-sprites.html
 //https://github.com/trapexit/chip-8_documentation/blob/master/README.md
+//https://github.com/JohnEarnest/Octo/blob/gh-pages/docs/XO-ChipSpecification.md
 
 //font
 const Uint8 font[80] = {
@@ -383,6 +384,8 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     bool sChip8Mode = false;
 
+    bool xoChipMode = true; //backwards compatable
+
     bool chip8HdMode = false;
 
     bool chip10Mode = false;
@@ -454,7 +457,7 @@ void cpuLoop(Uint8* data, uint32_t size)
                 exit(n);
             }
 
-            //0x00CN - superchip 8 instruction
+            //0x00CN
             //move each pixel in screen down by n pixels
             else if(byteFirst == 0x00 && numThird == 0xC && sChip8Mode)
             {
@@ -478,6 +481,15 @@ void cpuLoop(Uint8* data, uint32_t size)
                         }
                     }   
                 }
+            }
+
+            //0x00DN
+            else if(byteFirst == 0x00 && numThird == 0xD && xoChipMode)
+            {
+                PC += 2;
+
+                //todo later
+
             }
 
             //0x00E0
@@ -624,7 +636,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             //0NNN - checkme
             else if(numFirst == 0x0)
             {
-                //PC += 2;
+                PC += 2;
                 //
 
                 //todo later
@@ -685,30 +697,62 @@ void cpuLoop(Uint8* data, uint32_t size)
             //5XY1
             else if(numFirst == 0x5 && numLast == 0x1 && chip8EMode)
             {
-                
-                //todo later
+                PC += 2;
+
+                if(V[x] > V[y])
+                {
+                    PC += 2;
+                }
             }
 
             //5XY1
             else if(numFirst == 0x5 && numLast == 0x1 && chip8XMode)
             {
-                
-                //todo later
+                //checkme /fixme
+
+                PC += 2;
+    
+                V[x] += V[y];
             }
 
             //5XY2
-            else if(numFirst == 0x5 && numLast == 0x2 && chip8EMode)
+            else if(numFirst == 0x5 && numLast == 0x2 && (chip8EMode || chip8XMode))
             {
-                PC += 2;
-                //todo later
+                if(chip8EMode)
+                {
+                    PC += 2;
+
+                    if(V[x] < V[y])
+                    {
+                        PC += 2;
+                    }
+                }
+                else{
+                    PC += 2;
+
+                    //todo later
+                }
             }
                 
             
             //5XY3
-            else if(numFirst == 0x5 && numLast == 0x3 && chip8EMode)
+            else if(numFirst == 0x5 && numLast == 0x3 && (chip8EMode || chip8XMode))
             {
-                PC += 2;
-                //todo later
+                if(chip8EMode)
+                {
+                    PC += 2;
+
+                    if(V[x] != V[y])
+                    {
+                        PC += 2;
+                    }
+                }
+                else{
+
+                    PC += 2;
+
+                    //todo later
+                }
             }
 
             //6XNN
@@ -896,6 +940,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             else if(numFirst == 0xB && n == 0x0 && chip8XMode)
             {
                 PC += 2;
+                
                 //todo later
             }
 
@@ -1125,10 +1170,11 @@ void cpuLoop(Uint8* data, uint32_t size)
 
             }
 
-            //FX30 - superchip 8 instruction
+            //FX30
             else if(numFirst == 0xF && byteLast == 0x30 && sChip8Mode)
             {
-                
+                PC += 2;
+
                 //todo later
 
             }
@@ -1191,36 +1237,39 @@ void cpuLoop(Uint8* data, uint32_t size)
             }
 
             //FX75
-            else if(numFirst == 0xF && byteLast == 0x75 && chip8EMode)
+            else if(numFirst == 0xF && byteLast == 0x75)
             {
-                PC += 2;
-                //todo later
+                if(chip8EMode)
+                {
+                    PC += 2;
+
+                    //todo later
+                }
+                else if((sChip8Mode || xoChipMode))
+                {
+                    PC += 2;
+
+                    //todo later
+                }
             }
 
-            //FX75
-            else if(numFirst == 0xF && byteLast == 0x75 && sChip8Mode)
-            {
-                PC += 2;
-                //todo later
 
-            }
-
-            //FX85
-            else if(numFirst == 0xF && byteLast == 0x85 && sChip8Mode)
+            //FX85 
+            else if(numFirst == 0xF && byteLast == 0x85 && (sChip8Mode || xoChipMode))
             {
                 PC += 2;   
                 //todo later
 
             }
 
-            //FX94
+            //FX94 
             else if(numFirst == 0xF && byteLast == 0x94 && chip8EMode)
             {
                 PC += 2;
                 //todo later
             }
 
-            //FXFB
+            //FXFB 
             else if(numFirst == 0xF && byteLast == 0xFB && chip8XMode)
             {
                 PC += 2;
