@@ -396,6 +396,7 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     SP = 0x00;
     
+
     //copy font to memory
     memcpy(memory, font, 80);
 
@@ -411,7 +412,7 @@ void cpuLoop(Uint8* data, uint32_t size)
     Uint8 Width = 128;
     Uint8 Height = 64;
 
-    bool sChip8Mode = true;
+    bool sChip8Mode = false;
 
     bool xoChipMode = true; //backwards compatable
 
@@ -1038,7 +1039,7 @@ void cpuLoop(Uint8* data, uint32_t size)
                         if( (memory[I + row] >> (7 - col)) & 0x1 ) {
 
                             //check if pixel is out of bounds
-                            if(sChip8Mode) { //if out of bounds of 128 64 screen
+                            if(mode12864) { //if out of bounds of 128 64 screen
                                //if row of sprite goes out below screen stop drawing sprite
                                 if( (V[y] + row) >= 64) {
                                     goto spriteBreak;
@@ -1227,20 +1228,14 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
+                for(int ii = 0; ii <= x; ii++)
+                {
+                    memory[I + ii] = V[ii];
+                }
+
                 if((!sChip8Mode) || iToggle)
                 {
-                    for(I = I; I <= x; I++)
-                    {
-                        memory[I] = V[I];
-                    }
-                    I = I + 1;
-                }
-                else
-                {
-                    for(int ii = 0; ii <= x; ii++)
-                    {
-                        memory[I + ii] = V[ii];
-                    }
+                    I = I + x + 1;
                 }
 
             }
@@ -1250,19 +1245,14 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
+                for(int ii = 0; ii <= x; ii++)
+                {
+                    V[ii] = memory[I + ii];
+                }
+
                 if((!sChip8Mode) || iToggle)
                 {
-                    for(I = I; I <= x; I++)
-                    {
-                        V[I] = memory[I] & 0xFF;
-                    }
-                    I = x + 1;
-                }
-                else{
-                    for(int ii = 0; ii <= x; ii++)
-                    {
-                        V[ii] = memory[I + ii] & 0xFF;
-                    }
+                    I = I + x + 1;
                 }
                 
 
