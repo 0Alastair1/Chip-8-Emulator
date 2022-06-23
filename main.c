@@ -1048,10 +1048,6 @@ void cpuLoop(Uint8* data, uint32_t size)
 
                 //draw sprite from memory
 
-                Uint8 why = V[y];
-                Uint8 ex = V[x];
-
-
                 //foreach line/byte
                 for(size_t row = 0; row < n; row++)
                 {
@@ -1067,45 +1063,45 @@ void cpuLoop(Uint8* data, uint32_t size)
                                 //check if pixel is out of bounds
                                 if(mode12864) { //if out of bounds of 128 64 screen fixme
                                 //if row of sprite goes out below screen stop drawing sprite
-                                    if( (why + row) >= 64) {
+                                    if( (V[y] + row) >= 64) {
                                         goto spriteBreak;
                                     }
                                     //if the pixel goes out of bounds go to next row
-                                    else if( (why + col) >= 128) {
+                                    else if( (V[y] + col) >= 128) {
                                         goto rowBreak;
                                     }
                                     //if current row is out of bounds go to next row
-                                    else if( (why + row) < 0) {
+                                    else if( (V[y] + row) < 0) {
                                         goto rowBreak;
                                     }
                                     //if the current pixel is out of bounds go to next pixel
-                                    else if( (why + col) < 0) {
+                                    else if( (V[y] + col) < 0) {
                                         continue;
                                     }
                                     } else { //the same but 64 32 size screen
-                                    if( (why + row) >= 32) {
+                                    if( (V[y] + row) >= 32) {
                                         goto spriteBreak;
                                     }
-                                    else if( (ex + col) >= 64) {
+                                    else if( (V[x] + col) >= 64) {
                                         goto rowBreak;
                                     }
-                                    else if( (why + row) < 0) {
+                                    else if( (V[y] + row) < 0) {
                                         goto rowBreak;
                                     }
-                                    else if( (ex + col) < 0) {
+                                    else if( (V[x] + col) < 0) {
                                         continue;
                                     }
 
                                     //xor
                                     //check if pixel is already set
-                                    if(screen[ex + col][why + row] == 1)
+                                    if(screen[V[x] + col][V[y] + row] == 1)
                                     {
                                         V[0xF] = 1;
-                                        screen[ex + col][why + row] = 0;
+                                        screen[V[x] + col][V[y] + row] = 0;
                                     }
                                     else
                                     {
-                                        screen[ex + col][why + row] = 1;
+                                        screen[V[x] + col][V[y] + row] = 1;
                                     }
                                 }
                             }
@@ -1113,25 +1109,25 @@ void cpuLoop(Uint8* data, uint32_t size)
                                 //xor
                                 //check if pixel is already set
                                 if(!mode12864) {
-                                    if(screen[(ex + col) % 64][(why + row) % 32] == 1)
+                                    if(screen[(V[x] + col) % 64][(V[y] + row) % 32] == 1)
                                     {
                                         V[0xF] = 1;
-                                        screen[(ex + col) % 64][(why + row) % 32] = 0;
+                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 0;
                                     }
                                     else
                                     {
-                                        screen[(ex + col) % 64][(why + row) % 32] = 1;
+                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 1;
                                     }
                                 }
                                 else{
-                                    if(screen[(ex + col) % 128][(why + row) % 64] == 1)
+                                    if(screen[(V[x] + col) % 128][(V[y] + row) % 64] == 1)
                                     {
                                         V[0xF] = 1;
-                                        screen[(ex + col) % 128][(why + row) % 64] = 0;
+                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 0;
                                     }
                                     else
                                     {
-                                        screen[(ex + col) % 128][(why + row) % 64] = 1;
+                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 1;
                                     }
                                 }
                             }
