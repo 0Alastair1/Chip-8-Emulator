@@ -1,10 +1,12 @@
 [submodule "Vendor/SDL2"]
 	path = Vendor/SDL2
 	url = https://github.com/libsdl-org/SDL
-	
 [submodule "Vendor/tinyfd"]
 	path = Vendor/tinyfd
 	url = http://git.code.sf.net/p/tinyfiledialogs/code
-[submodule "Vendor/kiwi"]
-	path = Vendor/kiwi
-	url = https://github.com/mobius3/KiWi
+[submodule "Vendor/SDL_image"]
+	path = Vendor/SDL_image
+	url = https://github.com/libsdl-org/SDL_image
+[submodule "Vendor/SDL_ttf"]
+	path = Vendor/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf

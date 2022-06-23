@@ -48,6 +48,9 @@
 
 #include "Vendor/tinyfd/tinyfiledialogs.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #define Uint8 uint8_t
 #define Uint16 uint16_t
@@ -422,6 +425,9 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     //initialize SDL and store the result
     initSDL(&window, &renderer);
+    
+
+
     SDL_ShowWindow(window);
 
     //fixme get flags from user input
