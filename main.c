@@ -35,6 +35,8 @@
 
 #elif defined(_MSC_VER)
     #define PACKED( __Declaration__) __pragma( pack(push, 1)) __Declaration__ __pragma(pack(pop))
+#else
+    #define PACKED  
 #endif
 
 
@@ -1413,7 +1415,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
                 PC += 2;
 
-                V[0xF] = (I + V[x]) > 0xFFF ? 1 : 0; //qwerk
+                V[0xF] = (I + V[x]) > 0xFFF ? 1 : 0; //qwerk checkme
                 I += V[x];
             }
 
