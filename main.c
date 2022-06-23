@@ -144,10 +144,22 @@ union
 
     struct PACKED
     {
-        Uint8 key1: 1; Uint8 key2: 1; Uint8 key3: 1; Uint8 keyC: 1;
-        Uint8 key4: 1; Uint8 key5: 1; Uint8 key6: 1; Uint8 keyD: 1;
-        Uint8 key7: 1; Uint8 key8: 1; Uint8 key9: 1; Uint8 keyE: 1;
-        Uint8 keyA: 1; Uint8 key0: 1; Uint8 keyB: 1; Uint8 keyF: 1;
+        Uint8 key1: 1; 
+        Uint8 key2: 1; 
+        Uint8 key3: 1; 
+        Uint8 keyC: 1;
+        Uint8 key4: 1; 
+        Uint8 key5: 1; 
+        Uint8 key6: 1; 
+        Uint8 keyD: 1;
+        Uint8 key7: 1; 
+        Uint8 key8: 1; 
+        Uint8 key9: 1; 
+        Uint8 keyE: 1;
+        Uint8 keyA: 1; 
+        Uint8 key0: 1; 
+        Uint8 keyB: 1; 
+        Uint8 keyF: 1;
     } keys;
 } keyboard;
 #pragma pop()
@@ -399,7 +411,7 @@ void cpuLoop(Uint8* data, uint32_t size)
     Uint8 Width = 128;
     Uint8 Height = 64;
 
-    bool sChip8Mode = false;
+    bool sChip8Mode = true;
 
     bool xoChipMode = true; //backwards compatable
 
@@ -1080,7 +1092,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             else if(numFirst == 0xE && byteLast == 0x9E)
             {
                 PC += 2;
-                if(keyboard.keyboard & (1 << V[x]))
+                if(keyboard.keyboard & ( V[x]))
                 {
                     PC += 2;
                 }
@@ -1092,7 +1104,7 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
 
                 PC += 2;
-                if(!(keyboard.keyboard & (1 << V[x])))
+                if(!(keyboard.keyboard & ( V[x])))
                 {
                     PC += 2;
                 }
