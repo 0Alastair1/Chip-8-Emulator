@@ -396,7 +396,6 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     SP = 0x00;
     
-
     //copy font to memory
     memcpy(memory, font, 80);
 
@@ -414,7 +413,7 @@ void cpuLoop(Uint8* data, uint32_t size)
 
     bool sChip8Mode = false;
 
-    bool xoChipMode = true; //backwards compatable
+    bool xoChipMode = false;
 
     bool chip8HdMode = false;
 
@@ -1093,7 +1092,11 @@ void cpuLoop(Uint8* data, uint32_t size)
             else if(numFirst == 0xE && byteLast == 0x9E)
             {
                 PC += 2;
-                if(keyboard.keyboard & ( V[x]))
+
+                //input handling
+                inputs();
+                //if(keyboard.keyboard & ( V[x]))
+               if(V[x] == 0x1 && keyboard.keys.key1 || V[x] == 0x2 && keyboard.keys.key2 || V[x] == 0x3 && keyboard.keys.key3 || V[x] == 0xC && keyboard.keys.keyC || V[x] == 0x4 && keyboard.keys.key4 || V[x] == 0x5 && keyboard.keys.key5 || V[x] == 0x6 && keyboard.keys.key6 || V[x] == 0xD && keyboard.keys.keyD || V[x] == 0x7 && keyboard.keys.key7 || V[x] == 0x8 && keyboard.keys.key8 || V[x] == 0x9 && keyboard.keys.key9 || V[x] == 0xE && keyboard.keys.keyE || V[x] == 0xA && keyboard.keys.keyA || V[x] == 0x0 && keyboard.keys.key0 || V[x] == 0xB && keyboard.keys.keyB || V[x] == 0xF && keyboard.keys.keyF)
                 {
                     PC += 2;
                 }
@@ -1105,7 +1108,10 @@ void cpuLoop(Uint8* data, uint32_t size)
             {
 
                 PC += 2;
-                if(!(keyboard.keyboard & ( V[x])))
+                //input handling
+                inputs();
+                //if(!(keyboard.keyboard & ( V[x])))
+                if(V[x] == 0x1 && !keyboard.keys.key1 || V[x] == 0x2 && !keyboard.keys.key2 || V[x] == 0x3 && !keyboard.keys.key3 || V[x] == 0xC && !keyboard.keys.keyC || V[x] == 0x4 && !keyboard.keys.key4 || V[x] == 0x5 && !keyboard.keys.key5 || V[x] == 0x6 && !keyboard.keys.key6 || V[x] == 0xD && !keyboard.keys.keyD || V[x] == 0x7 && !keyboard.keys.key7 || V[x] == 0x8 && !keyboard.keys.key8 || V[x] == 0x9 && !keyboard.keys.key9 || V[x] == 0xE && !keyboard.keys.keyE || V[x] == 0xA && !keyboard.keys.keyA || V[x] == 0x0 && !keyboard.keys.key0 || V[x] == 0xB && !keyboard.keys.keyB || V[x] == 0xF && !keyboard.keys.keyF)
                 {
                     PC += 2;
                 }
@@ -1158,7 +1164,9 @@ void cpuLoop(Uint8* data, uint32_t size)
                     }
                 }
                 */
-               for(size_t i = 0; i < 16; i++)
+                //input handling
+                inputs();
+                for(size_t i = 0; i < 16; i++)
                 {
                     if(keyboard.keyboard >> i & 0x1)
                     {
@@ -1369,8 +1377,6 @@ void cpuLoop(Uint8* data, uint32_t size)
         if(soundTimer > 0)
             soundTimer--;
         
-        //input handling
-        inputs();
         
     }
 
