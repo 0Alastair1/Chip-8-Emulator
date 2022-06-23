@@ -35,6 +35,8 @@
 
 #elif defined(_MSC_VER)
     #define PACKED( __Declaration__) __pragma( pack(push, 1)) __Declaration__ __pragma(pack(pop))
+#else
+    #define PACKED  
 #endif
 
 
@@ -144,14 +146,201 @@ union
 
     struct PACKED
     {
-        Uint8 key1: 1; Uint8 key2: 1; Uint8 key3: 1; Uint8 keyC: 1;
-        Uint8 key4: 1; Uint8 key5: 1; Uint8 key6: 1; Uint8 keyD: 1;
-        Uint8 key7: 1; Uint8 key8: 1; Uint8 key9: 1; Uint8 keyE: 1;
-        Uint8 keyA: 1; Uint8 key0: 1; Uint8 keyB: 1; Uint8 keyF: 1;
+        Uint8 key1: 1; 
+        Uint8 key2: 1; 
+        Uint8 key3: 1; 
+        Uint8 keyC: 1;
+        Uint8 key4: 1; 
+        Uint8 key5: 1; 
+        Uint8 key6: 1; 
+        Uint8 keyD: 1;
+        Uint8 key7: 1; 
+        Uint8 key8: 1; 
+        Uint8 key9: 1; 
+        Uint8 keyE: 1;
+        Uint8 keyA: 1; 
+        Uint8 key0: 1; 
+        Uint8 keyB: 1; 
+        Uint8 keyF: 1;
     } keys;
 } keyboard;
 #pragma pop()
 
+<<<<<<< HEAD
+=======
+void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bool* xoChipMode,
+    bool* chip8HdMode, bool* chip10Mode, bool* chip8IMode, bool* chip8EMode, bool* chip8XMode)
+{
+    int width = width_s * scale;
+    int height = height_s * scale;
+    while(true)
+    {
+
+        //create ui tick buttons and text
+        int spacingy = 35;
+        int spacingx = 35;
+        int buttonsx = width /2 + width /6;
+
+        SDL_Rect noModebutton = {buttonsx, spacingy, 10, 10};
+
+        SDL_Rect sChip8ModeButton = {buttonsx, spacingy*2, 10, 10};
+
+        SDL_Rect xoChipModeButton = {buttonsx, spacingy*3, 10, 10};
+
+        SDL_Rect chip8HdModeButton = {buttonsx, spacingy*4, 10, 10};
+
+        SDL_Rect chip10ModeButton = {buttonsx, spacingy*5, 10, 10};
+
+        SDL_Rect chip8IModeButton = {buttonsx, spacingy*6 , 10, 10};
+
+        SDL_Rect chip8EModeButton = {buttonsx, spacingy*7 , 10, 10};
+
+        SDL_Rect chip8XModeButton = {buttonsx, spacingy*8 , 10, 10};
+
+
+        TTF_Font* Sans = TTF_OpenFont("", 24);.//fixme
+
+        if(!font) {
+            printf("font not found\n");
+            exit(1);
+        }
+        SDL_Color textColor = {255, 255, 255};
+
+        SDL_Surface* textSurface = TTF_RenderText_Solid(Sans, "Original mode", textColor);
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_Rect textRect = {buttonsx + spacingx, spacingy, textSurface->w, textSurface->h};
+
+        SDL_Surface* textSurface2 = TTF_RenderText_Solid(Sans, "sChip mode", textColor);
+        SDL_Texture* textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
+        SDL_Rect textRect2 = {buttonsx + spacingx, spacingy*2, textSurface2->w, textSurface2->h};
+
+        SDL_Surface* textSurface3 = TTF_RenderText_Solid(Sans, "XOChip mode", textColor);
+        SDL_Texture* textTexture3 = SDL_CreateTextureFromSurface(renderer, textSurface3);
+        SDL_Rect textRect3 = {buttonsx + spacingx, spacingy*3, textSurface3->w, textSurface3->h};
+
+        SDL_Surface* textSurface4 = TTF_RenderText_Solid(Sans, "Chip8HD mode", textColor);
+        SDL_Texture* textTexture4 = SDL_CreateTextureFromSurface(renderer, textSurface4);
+        SDL_Rect textRect4 = {buttonsx + spacingx, spacingy*4, textSurface4->w, textSurface4->h};
+
+        SDL_Surface* textSurface5 = TTF_RenderText_Solid(Sans, "Chip10 mode", textColor);
+        SDL_Texture* textTexture5 = SDL_CreateTextureFromSurface(renderer, textSurface5);
+        SDL_Rect textRect5 = {buttonsx + spacingx, spacingy*5, textSurface5->w, textSurface5->h};
+
+        SDL_Surface* textSurface6 = TTF_RenderText_Solid(Sans, "Chip8I mode", textColor);
+        SDL_Texture* textTexture6 = SDL_CreateTextureFromSurface(renderer, textSurface6);
+        SDL_Rect textRect6 = {buttonsx + spacingx, spacingy*6, textSurface6->w, textSurface6->h};
+
+        SDL_Surface* textSurface7 = TTF_RenderText_Solid(Sans, "Chip8E mode", textColor);
+        SDL_Texture* textTexture7 = SDL_CreateTextureFromSurface(renderer, textSurface7);
+        SDL_Rect textRect7 = {buttonsx + spacingx, spacingy*7, textSurface7->w, textSurface7->h};
+
+        SDL_Surface* textSurface8 = TTF_RenderText_Solid(Sans, "Chip8X mode", textColor);
+        SDL_Texture* textTexture8 = SDL_CreateTextureFromSurface(renderer, textSurface8);
+        SDL_Rect textRect8 = {buttonsx + spacingx, spacingy*8, textSurface8->w, textSurface8->h};
+        
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+
+        SDL_FreeSurface(textSurface2);
+        SDL_DestroyTexture(textTexture2);
+
+        SDL_FreeSurface(textSurface3);
+        SDL_DestroyTexture(textTexture3);
+
+        SDL_FreeSurface(textSurface4);
+        SDL_DestroyTexture(textTexture4);
+
+        SDL_FreeSurface(textSurface5);
+        SDL_DestroyTexture(textTexture5);
+
+        SDL_FreeSurface(textSurface6);
+        SDL_DestroyTexture(textTexture6);
+
+        SDL_FreeSurface(textSurface7);
+        SDL_DestroyTexture(textTexture7);
+
+        SDL_FreeSurface(textSurface8);
+        SDL_DestroyTexture(textTexture8);
+        
+        
+        TTF_CloseFont(Sans);
+
+        
+
+        SDL_Rect* buttons[9] = {&noModebutton, &sChip8ModeButton, &xoChipModeButton, &chip8HdModeButton, &chip10ModeButton, &chip8IModeButton, &chip8EModeButton, &chip8XModeButton};
+
+        SDL_Rect* textRects[9] = {&textRect, &textRect2, &textRect3, &textRect4, &textRect5, &textRect6, &textRect7, &textRect8};
+
+        SDL_Texture* textTextures[9] = {textTexture, textTexture2, textTexture3, textTexture4, textTexture5, textTexture6, textTexture7, textTexture8};
+
+        //draw ui
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        //draw all buttons in the list
+        for(int i = 0; i < 8; i++)
+        {
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(renderer, buttons[i]);
+        }
+        //draw all text in the list
+        for(int i = 0; i < 8; i++)
+        {
+            SDL_RenderCopy(renderer, textTextures[i], NULL, textRects[i]);
+        }
+
+
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+
+        SDL_RenderPresent(renderer);
+
+
+
+        //input
+        //get mouse clicks
+        SDL_Event event;
+        SDL_PollEvent(&event);
+        if(event.type == SDL_QUIT)
+        {
+            exit(0);
+        }
+        //mouse left click
+        if(event.type == SDL_MOUSEBUTTONDOWN)
+        {
+            int mouseX; 
+            int mouseY;
+            if(event.button.button == SDL_BUTTON_LEFT)
+            {
+                //handle inputs
+                SDL_GetMouseState(&mouseX, &mouseY);
+                if(mouseX >= 0 && mouseX <= width_s * scale && mouseY >= 0 && mouseY <= height_s * scale)
+                {
+
+                    char* filepath = openFile();
+                    struct file file = readFile(filepath);
+                    data = file.data;
+                    size = file.size;
+
+                    SDL_RenderClear(renderer);
+
+                    return;
+                }
+            }
+        }
+    }
+}
+
+int main(int argc, char const *argv[])
+{
+
+    char* filepath = openFile();
+    struct file file = readFile(filepath);
+    cpuLoop(file.data, file.size);
+    return 0;
+}
+>>>>>>> main
 
 
 void initSDL(SDL_Window** window, SDL_Renderer** renderer)
@@ -617,7 +806,63 @@ void cpuLoop()
     Uint8 Width = 128;
     Uint8 Height = 64;
 
+<<<<<<< HEAD
     
+=======
+    bool sChip8Mode = false;
+
+    bool xoChipMode = false;
+
+    bool chip8HdMode = false;
+
+    bool chip10Mode = false;
+
+    bool chip8IMode = false;
+
+    bool chip8EMode = false;
+
+    bool chip8XMode = false;
+
+    bool mode3232 = false;
+    bool mode6464 = false;
+    bool mode12864 = false;
+    bool iToggle = false;
+    
+    
+    
+    Uint8 currentKeyPressed = 255;
+    Uint16 opcode;
+
+    //initialize SDL and store the result
+    initSDL(&window, &renderer);
+    
+
+
+    SDL_ShowWindow(window);
+
+    //fixme get flags from user input
+
+    //configure chip8 versions according to flags
+    if(sChip8Mode)
+    {   //im guessing super chip doesnt start in high res
+        mode12864 = false;
+    }
+
+    if(chip10Mode)
+    {
+        mode12864 = true;
+    }
+
+    if(chip8HdMode)
+    {
+        mode3232 = true;
+    }
+    if(xoChipMode)//check me fix me 64 128 for xo chip?? if and when?
+    {
+
+    }
+
+>>>>>>> main
     //cpu loop
     //todo - check conflics caused by overlapping instructions
     while (true)
@@ -656,10 +901,11 @@ void cpuLoop()
                 //check me
                 for (size_t i = height_s; i > 0; i--)
                 {   
-                    if(height_s - n < 0)
+                    if(i - n < 0)//check me
                     {
                         for (size_t ii = 0; ii < width_s; ii++)
                         {
+                            //screen[ii][i] = screen[ii][height_s - (i - n)]; // check fix, does this wrap here?
                             screen[ii][i] = 0;
                         }
                          
@@ -976,6 +1222,11 @@ void cpuLoop()
             {
                 PC += 2;
 
+                if(!sChip8Mode && !xoChipMode)
+                {
+                    V[0xF] = 0;
+                }
+
                 V[x] = V[x] | V[y];
             }
 
@@ -984,6 +1235,11 @@ void cpuLoop()
             {
                 PC += 2;
 
+                if(!sChip8Mode && !xoChipMode)
+                {
+                    V[0xF] = 0;
+                }
+
                 V[x] = V[x] & V[y];
             }
 
@@ -991,6 +1247,11 @@ void cpuLoop()
             else if(numFirst == 0x8 && numLast == 0x3)
             {
                 PC += 2;
+
+                if(!sChip8Mode && !xoChipMode)
+                {
+                    V[0xF] = 0;
+                }
 
                 V[x] = V[x] ^ V[y];
             }
@@ -1192,53 +1453,84 @@ void cpuLoop()
                     //foreach pixel/bit in line
                     for(size_t col = 0; col < 8; col++)
                     {
+                        
                         //checks if the bit at index col in the byte is set
                         if( (memory[I + row] >> (7 - col)) & 0x1 ) {
 
-                            //check if pixel is out of bounds
-                            if(sChip8Mode) { //if out of bounds of 128 64 screen
-                               //if row of sprite goes out below screen stop drawing sprite
-                                if( (V[y] + row) >= 64) {
-                                    goto spriteBreak;
+                            if(!xoChipMode)
+                            {
+                                //check if pixel is out of bounds
+                                if(mode12864) { //if out of bounds of 128 64 screen fixme
+                                //if row of sprite goes out below screen stop drawing sprite
+                                    if( (V[y] + row) >= 64) {
+                                        goto spriteBreak;
+                                    }
+                                    //if the pixel goes out of bounds go to next row
+                                    else if( (V[y] + col) >= 128) {
+                                        goto rowBreak;
+                                    }
+                                    //if current row is out of bounds go to next row
+                                    else if( (V[y] + row) < 0) {
+                                        goto rowBreak;
+                                    }
+                                    //if the current pixel is out of bounds go to next pixel
+                                    else if( (V[y] + col) < 0) {
+                                        continue;
+                                    }
+                                    } else { //the same but 64 32 size screen
+                                    if( (V[y] + row) >= 32) {
+                                        goto spriteBreak;
+                                    }
+                                    else if( (V[x] + col) >= 64) {
+                                        goto rowBreak;
+                                    }
+                                    else if( (V[y] + row) < 0) {
+                                        goto rowBreak;
+                                    }
+                                    else if( (V[x] + col) < 0) {
+                                        continue;
+                                    }
+
+                                    //xor
+                                    //check if pixel is already set
+                                    if(screen[V[x] + col][V[y] + row] == 1)
+                                    {
+                                        V[0xF] = 1;
+                                        screen[V[x] + col][V[y] + row] = 0;
+                                    }
+                                    else
+                                    {
+                                        screen[V[x] + col][V[y] + row] = 1;
+                                    }
                                 }
-                                //if the pixel goes out of bounds go to next row
-                                else if( (V[x] + col) >= 128) {
-                                    goto rowBreak;
+                            }
+                            else{
+                                //xor
+                                //check if pixel is already set
+                                if(!mode12864) {
+                                    if(screen[(V[x] + col) % 64][(V[y] + row) % 32] == 1)
+                                    {
+                                        V[0xF] = 1;
+                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 0;
+                                    }
+                                    else
+                                    {
+                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 1;
+                                    }
                                 }
-                                //if current row is out of bounds go to next row
-                                else if( (V[y] + row) < 0) {
-                                    goto rowBreak;
-                                }
-                                //if the current pixel is out of bounds go to next pixel
-                                else if( (V[x] + col) < 0) {
-                                    continue;
-                                }
-                            } else { //the same but 64 32 size screen
-                                if( (V[y] + row) >= 32) {
-                                    goto spriteBreak;
-                                }
-                                else if( (V[x] + col) >= 64) {
-                                    goto rowBreak;
-                                }
-                                else if( (V[y] + row) < 0) {
-                                    goto rowBreak;
-                                }
-                                else if( (V[x] + col) < 0) {
-                                    continue;
+                                else{
+                                    if(screen[(V[x] + col) % 128][(V[y] + row) % 64] == 1)
+                                    {
+                                        V[0xF] = 1;
+                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 0;
+                                    }
+                                    else
+                                    {
+                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 1;
+                                    }
                                 }
                             }
                             
-                            //xor
-                            //check if pixel is already set
-                            if(screen[V[x] + col][V[y] + row] == 1)
-                            {
-                                V[0xF] = 1;
-                                screen[V[x] + col][V[y] + row] = 0;
-                            }
-                            else
-                            {
-                                screen[V[x] + col][V[y] + row] = 1;
-                            }
                         }
                     }
                     rowBreak:
@@ -1250,7 +1542,11 @@ void cpuLoop()
             else if(numFirst == 0xE && byteLast == 0x9E)
             {
                 PC += 2;
-                if(keyboard.keyboard & (1 << V[x]))
+
+                //input handling
+                inputs();
+                //if(keyboard.keyboard & ( V[x]))
+               if(V[x] == 0x1 && keyboard.keys.key1 || V[x] == 0x2 && keyboard.keys.key2 || V[x] == 0x3 && keyboard.keys.key3 || V[x] == 0xC && keyboard.keys.keyC || V[x] == 0x4 && keyboard.keys.key4 || V[x] == 0x5 && keyboard.keys.key5 || V[x] == 0x6 && keyboard.keys.key6 || V[x] == 0xD && keyboard.keys.keyD || V[x] == 0x7 && keyboard.keys.key7 || V[x] == 0x8 && keyboard.keys.key8 || V[x] == 0x9 && keyboard.keys.key9 || V[x] == 0xE && keyboard.keys.keyE || V[x] == 0xA && keyboard.keys.keyA || V[x] == 0x0 && keyboard.keys.key0 || V[x] == 0xB && keyboard.keys.keyB || V[x] == 0xF && keyboard.keys.keyF)
                 {
                     PC += 2;
                 }
@@ -1262,7 +1558,10 @@ void cpuLoop()
             {
 
                 PC += 2;
-                if(!(keyboard.keyboard & (1 << V[x])))
+                //input handling
+                inputs();
+                //if(!(keyboard.keyboard & ( V[x])))
+                if(V[x] == 0x1 && !keyboard.keys.key1 || V[x] == 0x2 && !keyboard.keys.key2 || V[x] == 0x3 && !keyboard.keys.key3 || V[x] == 0xC && !keyboard.keys.keyC || V[x] == 0x4 && !keyboard.keys.key4 || V[x] == 0x5 && !keyboard.keys.key5 || V[x] == 0x6 && !keyboard.keys.key6 || V[x] == 0xD && !keyboard.keys.keyD || V[x] == 0x7 && !keyboard.keys.key7 || V[x] == 0x8 && !keyboard.keys.key8 || V[x] == 0x9 && !keyboard.keys.key9 || V[x] == 0xE && !keyboard.keys.keyE || V[x] == 0xA && !keyboard.keys.keyA || V[x] == 0x0 && !keyboard.keys.key0 || V[x] == 0xB && !keyboard.keys.keyB || V[x] == 0xF && !keyboard.keys.keyF)
                 {
                     PC += 2;
                 }
@@ -1315,7 +1614,9 @@ void cpuLoop()
                     }
                 }
                 */
-               for(size_t i = 0; i < 16; i++)
+                //input handling
+                inputs();
+                for(size_t i = 0; i < 16; i++)
                 {
                     if(keyboard.keyboard >> i & 0x1)
                     {
@@ -1347,7 +1648,7 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = (I + V[x]) > 0xFFF ? 1 : 0; //qwerk
+                V[0xF] = (I + V[x]) > 0xFFF ? 1 : 0; //qwerk checkme
                 I += V[x];
             }
 
@@ -1385,20 +1686,14 @@ void cpuLoop()
             {
                 PC += 2;
 
+                for(int ii = 0; ii <= x; ii++)
+                {
+                    memory[I + ii] = V[ii];
+                }
+
                 if((!sChip8Mode) || iToggle)
                 {
-                    for(I = I; I <= x; I++)
-                    {
-                        memory[I] = V[I];
-                    }
-                    I = I + 1;
-                }
-                else
-                {
-                    for(int ii = 0; ii <= x; ii++)
-                    {
-                        memory[I + ii] = V[ii];
-                    }
+                    I = I + x + 1;
                 }
 
             }
@@ -1408,19 +1703,14 @@ void cpuLoop()
             {
                 PC += 2;
 
+                for(int ii = 0; ii <= x; ii++)
+                {
+                    V[ii] = memory[I + ii];
+                }
+
                 if((!sChip8Mode) || iToggle)
                 {
-                    for(I = I; I <= x; I++)
-                    {
-                        V[I] = memory[I] & 0xFF;
-                    }
-                    I = x + 1;
-                }
-                else{
-                    for(int ii = 0; ii <= x; ii++)
-                    {
-                        V[ii] = memory[I + ii] & 0xFF;
-                    }
+                    I = I + x + 1;
                 }
                 
 
@@ -1537,8 +1827,6 @@ void cpuLoop()
         if(soundTimer > 0)
             soundTimer--;
         
-        //input handling
-        inputs();
         
     }
 
