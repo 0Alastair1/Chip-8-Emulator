@@ -141,6 +141,11 @@ void writeFont();
 #define height_s 64
 #define scale 5
 
+Uint8 lastLastKeyPressed = 255;
+Uint8 lastKeyPressed = 255;
+Uint8 lastKeyUp = 255;
+bool keyToggle = false;
+
 #pragma push()
 #pragma pack(1)
 union
@@ -542,66 +547,82 @@ void inputs()
             {
                 case SDLK_1:
                     keyboard.keys.key1 = 1;
+                    lastKeyPressed = 1;
                     break;
 
                 case SDLK_2:
                     keyboard.keys.key2 = 1;
+                    lastKeyPressed = 2;
                     break;
                 
                 case SDLK_3:
                     keyboard.keys.key3 = 1;
+                    lastKeyPressed = 3;
                     break;
                     
                 case SDLK_4:
                     keyboard.keys.keyC = 1;
+                    lastKeyPressed = 4;
                     break;
 
                 case SDLK_q:
                     keyboard.keys.key4 = 1;
+                    lastKeyPressed = 5;
                     break;
 
                 case SDLK_w:
                     keyboard.keys.key5 = 1;
+                    lastKeyPressed = 6;
                     break;
 
                 case SDLK_e:
                     keyboard.keys.key6 = 1;
+                    lastKeyPressed = 7;
                     break;
 
                 case SDLK_r:
                     keyboard.keys.keyD = 1;
+                    lastKeyPressed = 8;
                     break;
 
                 case SDLK_a:
                     keyboard.keys.key7 = 1;
+                    lastKeyPressed = 9;
                     break;
 
                 case SDLK_s:
                     keyboard.keys.key8 = 1;
+                    lastKeyPressed = 10;
                     break;
 
                 case SDLK_d:
                     keyboard.keys.key9 = 1;
+                    lastKeyPressed = 11;
                     break;
                 
                 case SDLK_f:
                     keyboard.keys.keyE = 1;
+                    lastKeyPressed = 12;
                     break;
 
                 case SDLK_z:
                     keyboard.keys.keyA = 1;
+                    lastKeyPressed = 13;
                     break;
 
                 case SDLK_x:
                     keyboard.keys.key0 = 1;
+                    lastKeyPressed = 14;
                     break;
 
                 case SDLK_c:
                     keyboard.keys.keyB = 1;
+                    lastKeyPressed = 15;
                     break;
 
                 case SDLK_v:
                     keyboard.keys.keyF = 1;
+                    lastKeyPressed = 16;
                     break;
 
                 case SDLK_ESCAPE:
@@ -618,66 +639,82 @@ void inputs()
             {
                 case SDLK_1:
                     keyboard.keys.key1 = 0;
+                    lastKeyUp = 1;
                     break;
 
                 case SDLK_2:
                     keyboard.keys.key2 = 0;
+                    lastKeyUp = 2;
                     break;
                 
                 case SDLK_3:
                     keyboard.keys.key3 = 0;
+                    lastKeyUp = 3;
                     break;
                     
                 case SDLK_4:
                     keyboard.keys.keyC = 0;
+                    lastKeyUp = 4;
                     break;
 
                 case SDLK_q:
                     keyboard.keys.key4 = 0;
+                    lastKeyUp = 5;
                     break;
 
                 case SDLK_w:
                     keyboard.keys.key5 = 0;
+                    lastKeyUp = 6;
                     break;
 
                 case SDLK_e:
                     keyboard.keys.key6 = 0;
+                    lastKeyUp = 7;
                     break;
 
                 case SDLK_r:
                     keyboard.keys.keyD = 0;
+                    lastKeyUp = 8;
                     break;
 
                 case SDLK_a:
                     keyboard.keys.key7 = 0;
+                    lastKeyUp = 9;
                     break;
 
                 case SDLK_s:
                     keyboard.keys.key8 = 0;
+                    lastKeyUp = 10;
                     break;
 
                 case SDLK_d:
                     keyboard.keys.key9 = 0;
+                    lastKeyUp = 11;
                     break;
                 
                 case SDLK_f:
                     keyboard.keys.keyE = 0;
+                    lastKeyUp = 12;
                     break;
 
                 case SDLK_z:
                     keyboard.keys.keyA = 0;
+                    lastKeyUp = 13;
                     break;
 
                 case SDLK_x:
                     keyboard.keys.key0 = 0;
+                    lastKeyUp = 14;
                     break;
 
                 case SDLK_c:
                     keyboard.keys.keyB = 0;
+                    lastKeyUp = 15;
                     break;
 
                 case SDLK_v:
                     keyboard.keys.keyF = 0;
+                    lastKeyUp = 16;
                     break;
 
                 case SDLK_ESCAPE:
@@ -710,7 +747,7 @@ void cpuLoop()
 
     bool sChip8Mode = false;
 
-    bool xoChipMode = true;
+    bool xoChipMode = false;
 
     bool chip8HdMode = false;
 
@@ -727,9 +764,6 @@ void cpuLoop()
     bool mode12864 = false;
     bool iToggle = false;
     
-    
-    
-    Uint8 currentKeyPressed = 255;
     Uint16 opcode;
 
     
@@ -1543,37 +1577,145 @@ void cpuLoop()
             //FX0A
             else if(numFirst == 0xF && byteLast == 0x0A)
             {
-                /* broken
-                //original behavior, fixme for superchip
-                if(currentKeyPressed == 255)
+                if(!sChip8Mode || !xoChipMode) //fixme - does xoChipMode and other modes use original input here?
                 {
-                    for(size_t i = 0; i < 16; i++)
+                    inputs();
+                    if(keyToggle == false)
                     {
-                        if(keyboard.keyboard >> i & 0x1)
+                        lastKeyPressed = 255;
+                        lastKeyUp = 255;
+                        keyToggle = true;
+                    }
+                    else
+                    {
+                        if(lastKeyPressed != 255 && lastKeyUp != 255)
                         {
-                            currentKeyPressed = i;
+                            if(lastKeyPressed == lastKeyUp)
+                            {
+                                V[x] = lastKeyPressed;
+                                keyToggle = false;
+                                PC += 2;
+                            }
                         }
                     }
                 }
                 else{
-                    if(!(keyboard.keyboard >> currentKeyPressed & 0x1))
+                    inputs();
+                    
+                    if(keyboard.keys.key1)
                     {
+                        V[x] = 0x1;
                         PC += 2;
-                        V[x] = currentKeyPressed;
-                        currentKeyPressed = 255;
                         break;
                     }
-                }
-                */
-                //input handling
-                inputs();
-                for(size_t i = 0; i < 16; i++)
-                {
-                    if(keyboard.keyboard >> i & 0x1)
+                    else if(keyboard.keys.key2)
                     {
+                        V[x] = 0x2;
                         PC += 2;
-                        V[x] = i;
+                        break;
+                    }if(lastLastKeyPressed != 255 && lastLastKeyPressed != 117)
+                    {
+                        lastLastKeyPressed = lastKeyPressed;
                     }
+                    
+                    if(lastKeyUp == lastLastKeyPressed)
+                    {
+                        lastLastKeyPressed = 117;
+                    }
+
+                    if(lastKeyPressed != 255)
+                    {
+                        V[x] = lastKeyPressed;
+                        PC += 2;
+                        lastKeyPressed = 255;
+                        lastLastKeyPressed = 255;
+                        break;
+                    }
+                    else if(keyboard.keys.key3)
+                    {
+                        V[x] = 0x3;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.keyC)
+                    {
+                        V[x] = 0xC;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.key4)
+                    {
+                        V[x] = 0x4;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.key5)
+                    {
+                        V[x] = 0x5;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.key6)
+                    {
+                        V[x] = 0x6;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.keyD)
+                    {
+                        V[x] = 0xD;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.key7)
+                    {
+                        V[x] = 0x7;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.key8)
+                    {
+                        V[x] = 0x8;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.key9)
+                    {
+                        V[x] = 0x9;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.keyE)
+                    {
+                        V[x] = 0xE;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.keyA)
+                    {
+                        V[x] = 0xA;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.key0)
+                    {
+                        V[x] = 0x0;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.keyB)
+                    {
+                        V[x] = 0xB;
+                        PC += 2;
+                        break;
+                    }
+                    else if(keyboard.keys.keyF)
+                    {
+                        V[x] = 0xF;
+                        PC += 2;
+                        break;
+                    }
+                    
                 }
                 
             }
