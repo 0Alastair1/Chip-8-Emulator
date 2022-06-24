@@ -378,9 +378,6 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
         {
             selectedMode[0] = true;
         }
-        
-
-
 
         SDL_RenderPresent(renderer);
 
@@ -421,6 +418,10 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
                             if(mouseX >= openFileButton.x - 10 && mouseX <= openFileButton.x + openFileButton.w + 200 && mouseY >= openFileButton.y - 10 && mouseY <= openFileButton.y + openFileButton.h + 10)
                             {
                                 char* filepath = openFile();
+                                if(filepath == 0x0)
+                                {
+                                    break;
+                                }
                                 struct file file = readFile(filepath);
                                 data = file.data;
                                 size = file.size;
@@ -740,7 +741,6 @@ void cpuLoop()
 
     p_libsys_init();
 
-    //fixme get flags from user input
     //draw starting ui screen
     Uint8* objects;
     startingUi(window, renderer, &sChip8Mode, &xoChipMode, &chip8HdMode, &chip10Mode, &chip8IMode, &chip8EMode, &chip8XMode);
@@ -750,7 +750,7 @@ void cpuLoop()
 
     //configure chip8 versions according to flags
     if(sChip8Mode)
-    {   //im guessing super chip doesnt start in high res
+    {
         mode12864 = false;
     }
 
@@ -1804,24 +1804,23 @@ char* openFile()
         ofn.Flags           = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
     #else
-        /*
-        printf("Please enter the filepath: ");
-        #ifdef __STDC_LIB_EXT1__
-            scanf_s("%s", filepath, 64);
-        #else
-        scanf("%s", filepath);
-        #endif
-        */
-        //tiny file dialog
 
         filepath = "";
         p_uthread_create((void*)fileDialog, NULL, true, NULL);
 
-        
+
         while(filepath == "")
         {
             SDL_Delay(10);
             SDL_RenderPresent(renderer);
+
+            
+        }
+
+        if(filepath == NULL || filepath == 0x0)
+        {
+            printf("filepath is null\n");
+            return 0x0;
         }
 
     #endif
