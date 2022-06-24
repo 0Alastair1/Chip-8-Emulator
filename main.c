@@ -184,6 +184,7 @@ uint32_t size;
 void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bool* xoChipMode,
     bool* chip8HdMode, bool* chip10Mode, bool* chip8IMode, bool* chip8EMode, bool* chip8XMode)
 {
+
     int width = width_s * scale;
     int height = height_s * scale;
 
@@ -211,6 +212,12 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
     SDL_Surface* textSurface8;
     SDL_Texture* textTexture8;
 
+    SDL_Texture* textTexture9;
+    SDL_Surface* textSurface9;
+
+    SDL_Texture* textTexture10;
+    SDL_Surface* textSurface10;
+
     writeFont();
 
     TTF_Init();
@@ -220,72 +227,87 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
     SDL_Color textColor = {255, 255, 255};
 
     //create ui tick buttons and text
-        int spacingy = 35;
-        int spacingx = 20;
-        int buttonsx = width /2 + width/8;
+    int spacingy = 35;
+    int spacingx = 20;
+    int buttonsx = width /2 + width/8;
 
-        SDL_Rect noModebutton = {buttonsx, spacingy, 10, 10};
+    SDL_Rect noModebutton = {buttonsx, spacingy, 10, 10};
 
-        SDL_Rect sChip8ModeButton = {buttonsx, spacingy*2, 10, 10};
+    SDL_Rect sChip8ModeButton = {buttonsx, spacingy*2, 10, 10};
 
-        SDL_Rect xoChipModeButton = {buttonsx, spacingy*3, 10, 10};
+    SDL_Rect xoChipModeButton = {buttonsx, spacingy*3, 10, 10};
 
-        SDL_Rect chip8HdModeButton = {buttonsx, spacingy*4, 10, 10};
+    SDL_Rect chip8HdModeButton = {buttonsx, spacingy*4, 10, 10};
 
-        SDL_Rect chip10ModeButton = {buttonsx, spacingy*5, 10, 10};
+    SDL_Rect chip10ModeButton = {buttonsx, spacingy*5, 10, 10};
 
-        SDL_Rect chip8IModeButton = {buttonsx, spacingy*6 , 10, 10};
+    SDL_Rect chip8IModeButton = {buttonsx, spacingy*6 , 10, 10};
 
-        SDL_Rect chip8EModeButton = {buttonsx, spacingy*7 , 10, 10};
+    SDL_Rect chip8EModeButton = {buttonsx, spacingy*7 , 10, 10};
 
-        SDL_Rect chip8XModeButton = {buttonsx, spacingy*8 , 10, 10};
+    SDL_Rect chip8XModeButton = {buttonsx, spacingy*8 , 10, 10};
 
 
-        textSurface = TTF_RenderText_Solid(font, "CHIP8 MODE", textColor);
-        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_Rect textRect = {buttonsx + spacingx, spacingy, textSurface->w, textSurface->h};
+    textSurface = TTF_RenderText_Solid(font, "CHIP8 MODE", textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect textRect = {buttonsx + spacingx, spacingy, textSurface->w, textSurface->h};
 
-        textSurface2 = TTF_RenderText_Solid(font, "SCHIP MODE", textColor);
-        textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
-        SDL_Rect textRect2 = {buttonsx + spacingx, spacingy*2, textSurface2->w, textSurface2->h};
+    textSurface2 = TTF_RenderText_Solid(font, "SCHIP MODE", textColor);
+    textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
+    SDL_Rect textRect2 = {buttonsx + spacingx, spacingy*2, textSurface2->w, textSurface2->h};
 
-        textSurface3 = TTF_RenderText_Solid(font, "XOCHIP MODE", textColor);
-        textTexture3 = SDL_CreateTextureFromSurface(renderer, textSurface3);
-        SDL_Rect textRect3 = {buttonsx + spacingx, spacingy*3, textSurface3->w, textSurface3->h};
+    textSurface3 = TTF_RenderText_Solid(font, "XOCHIP MODE", textColor);
+    textTexture3 = SDL_CreateTextureFromSurface(renderer, textSurface3);
+    SDL_Rect textRect3 = {buttonsx + spacingx, spacingy*3, textSurface3->w, textSurface3->h};
 
-        textSurface4 = TTF_RenderText_Solid(font, "CHIP8HD MODE", textColor);
-        textTexture4 = SDL_CreateTextureFromSurface(renderer, textSurface4);
-        SDL_Rect textRect4 = {buttonsx + spacingx, spacingy*4, textSurface4->w, textSurface4->h};
+    textSurface4 = TTF_RenderText_Solid(font, "CHIP8HD MODE", textColor);
+    textTexture4 = SDL_CreateTextureFromSurface(renderer, textSurface4);
+    SDL_Rect textRect4 = {buttonsx + spacingx, spacingy*4, textSurface4->w, textSurface4->h};
 
-        textSurface5 = TTF_RenderText_Solid(font, "CHIP10 MODE", textColor);
-        textTexture5 = SDL_CreateTextureFromSurface(renderer, textSurface5);
-        SDL_Rect textRect5 = {buttonsx + spacingx, spacingy*5, textSurface5->w, textSurface5->h};
+    textSurface5 = TTF_RenderText_Solid(font, "CHIP10 MODE", textColor);
+    textTexture5 = SDL_CreateTextureFromSurface(renderer, textSurface5);
+    SDL_Rect textRect5 = {buttonsx + spacingx, spacingy*5, textSurface5->w, textSurface5->h};
 
-        textSurface6 = TTF_RenderText_Solid(font, "CHIP8I MODE", textColor);
-        textTexture6 = SDL_CreateTextureFromSurface(renderer, textSurface6);
-        SDL_Rect textRect6 = {buttonsx + spacingx, spacingy*6, textSurface6->w, textSurface6->h};
+    textSurface6 = TTF_RenderText_Solid(font, "CHIP8I MODE", textColor);
+    textTexture6 = SDL_CreateTextureFromSurface(renderer, textSurface6);
+    SDL_Rect textRect6 = {buttonsx + spacingx, spacingy*6, textSurface6->w, textSurface6->h};
 
-        textSurface7 = TTF_RenderText_Solid(font, "CHIP8E MODE", textColor);
-        textTexture7 = SDL_CreateTextureFromSurface(renderer, textSurface7);
-        SDL_Rect textRect7 = {buttonsx + spacingx, spacingy*7, textSurface7->w, textSurface7->h};
+    textSurface7 = TTF_RenderText_Solid(font, "CHIP8E MODE", textColor);
+    textTexture7 = SDL_CreateTextureFromSurface(renderer, textSurface7);
+    SDL_Rect textRect7 = {buttonsx + spacingx, spacingy*7, textSurface7->w, textSurface7->h};
 
-        textSurface8 = TTF_RenderText_Solid(font, "CHIP8X MODE", textColor);
-        textTexture8 = SDL_CreateTextureFromSurface(renderer, textSurface8);
-        SDL_Rect textRect8 = {buttonsx + spacingx, spacingy*8, textSurface8->w, textSurface8->h};
-    
+    textSurface8 = TTF_RenderText_Solid(font, "CHIP8X MODE", textColor);
+    textTexture8 = SDL_CreateTextureFromSurface(renderer, textSurface8);
+    SDL_Rect textRect8 = {buttonsx + spacingx, spacingy*8, textSurface8->w, textSurface8->h};
 
-        
+    SDL_Rect* buttons[9] = {&noModebutton, &sChip8ModeButton, &xoChipModeButton, &chip8HdModeButton, &chip10ModeButton, &chip8IModeButton, &chip8EModeButton, &chip8XModeButton};
 
-        SDL_Rect* buttons[9] = {&noModebutton, &sChip8ModeButton, &xoChipModeButton, &chip8HdModeButton, &chip10ModeButton, &chip8IModeButton, &chip8EModeButton, &chip8XModeButton};
+    SDL_Rect* textRects[9] = {&textRect, &textRect2, &textRect3, &textRect4, &textRect5, &textRect6, &textRect7, &textRect8};
 
-        SDL_Rect* textRects[9] = {&textRect, &textRect2, &textRect3, &textRect4, &textRect5, &textRect6, &textRect7, &textRect8};
+    SDL_Texture* textTextures[9] = {textTexture, textTexture2, textTexture3, textTexture4, textTexture5, textTexture6, textTexture7, textTexture8};
 
-        SDL_Texture* textTextures[9] = {textTexture, textTexture2, textTexture3, textTexture4, textTexture5, textTexture6, textTexture7, textTexture8};
+    bool selectedMode[9] = {true, false, false, false, false, false, false, false, false};
+
+    #undef x
+    #undef y
+
+    SDL_Rect openFileButton = {width /2 - width/3, height/4, 80, 50};
+
+    textSurface9 = TTF_RenderText_Solid(font, "OPEN FILE", textColor);
+    textTexture9 = SDL_CreateTextureFromSurface(renderer, textSurface9);
+
+    SDL_Rect playButton = {width /2 - width/4, height - height/4, 50, 50};
+
+    textSurface10 = TTF_RenderText_Solid(font, "PLAY", textColor);
+    textTexture10 = SDL_CreateTextureFromSurface(renderer, textSurface10);
+
+    bool ready = false;
+
+    //todo recently used files
+    //todo save config
 
     while(true)
     {
-        
-
         //draw ui
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -293,7 +315,14 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
         //draw all buttons in the list
         for(int i = 0; i < 8; i++)
         {
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            if(selectedMode[i])
+            {
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+            }
+            else
+            {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            }
             SDL_RenderFillRect(renderer, buttons[i]);
         }
         //draw all text in the list
@@ -303,12 +332,51 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
         }
 
 
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
+        
+
+        SDL_RenderCopy(renderer, textTexture9, NULL, &openFileButton);
+
+        if(ready)
+        {
+            SDL_RenderCopy(renderer, textTexture10, NULL, &playButton);
+        }
+
+        SDL_Point mouse;
+
+        //change the color of openfile and play button when mouse is clicked on them
+        if(SDL_GetMouseState(&mouse.x, &mouse.y) & SDL_BUTTON(SDL_BUTTON_LEFT))
+        {
+            if(mouse.x >= openFileButton.x && mouse.x <= openFileButton.x + openFileButton.w && mouse.y >= openFileButton.y && mouse.y <= openFileButton.y + openFileButton.h)
+            {
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+                SDL_RenderFillRect(renderer, &openFileButton);
+            }
+            if(mouse.x >= playButton.x && mouse.x <= playButton.x + playButton.w && mouse.y >= playButton.y && mouse.y <= playButton.y + playButton.h)
+            {
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+                SDL_RenderFillRect(renderer, &playButton);
+            }
+        }
+
+        //if no buttons are clicked set chip8 mode to clicked
+        bool noneSelected = true;
+        for (size_t i = 0; i < 8; i++)
+        {
+            if(selectedMode[i])
+            {
+                noneSelected = false;
+            }
+        }
+        if(noneSelected)
+        {
+            selectedMode[0] = true;
+        }
+        
+
 
 
         SDL_RenderPresent(renderer);
-
-
 
         //input
         //get mouse clicks
@@ -329,46 +397,114 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
                 SDL_GetMouseState(&mouseX, &mouseY);
                 if(mouseX >= 0 && mouseX <= width_s * scale && mouseY >= 0 && mouseY <= height_s * scale)
                 {
+                    //check if any button was clicked
+                    for(int i = 0; i < 8; i++)
+                    {
+                        if(mouseX >= buttons[i]->x - 10 && mouseX <= buttons[i]->x + buttons[i]->w + 200 && mouseY >= buttons[i]->y - 10 && mouseY <= buttons[i]->y + buttons[i]->h + 10)
+                        {
+                            selectedMode[i] = !selectedMode[i];
+                            for(int j = 0; j < 8; j++)
+                            {
+                                if(j != i)
+                                {
+                                    selectedMode[j] = false;
+                                }
+                            }
+                        }
+                    }
 
-                    char* filepath = openFile();
-                    struct file file = readFile(filepath);
-                    data = file.data;
-                    size = file.size;
+                    if(mouseX >= openFileButton.x - 10 && mouseX <= openFileButton.x + openFileButton.w + 200 && mouseY >= openFileButton.y - 10 && mouseY <= openFileButton.y + openFileButton.h + 10)
+                    {
+                        char* filepath = openFile();
+                        struct file file = readFile(filepath);
+                        data = file.data;
+                        size = file.size;
+                        ready = true;       
+                    }
 
-                    SDL_RenderClear(renderer);
+                    if(mouseX >= playButton.x - 10 && mouseX <= playButton.x + playButton.w + 200 && mouseY >= playButton.y - 10 && mouseY <= playButton.y + playButton.h + 10 && ready)
+                    {
+                        if(selectedMode[0])
+                        {
 
-                    return;
+                        }
+                        if(selectedMode[1])
+                        {
+                            //sChip mode
+                            *sChip8Mode = true;
+
+                        }
+                        if(selectedMode[2])
+                        {
+                            //xoChip mode
+                            *xoChipMode = true;
+
+                        }
+                        if(selectedMode[3])
+                        {
+                            //chip8HD mode
+                            *chip8HdMode = true;
+                            
+                        }
+                        if(selectedMode[4])
+                        {
+                            //chip10 mode
+                            *chip10Mode = true;
+                            
+                        }
+                        if(selectedMode[5])
+                        {
+                            //chip8I mode
+                            *chip8IMode = true;
+                            
+                        }
+                        if(selectedMode[6])
+                        {
+                            //chip8E mode
+                            *chip8EMode = true;
+                            
+                        }
+                        if(selectedMode[7])
+                        {
+                            //chip8X mode
+                            *chip8XMode = true;
+                            
+                        }
+
+                        SDL_RenderClear(renderer);
+                        SDL_FreeSurface(textSurface);
+                        SDL_DestroyTexture(textTexture);
+
+                        SDL_FreeSurface(textSurface2);
+                        SDL_DestroyTexture(textTexture2);
+
+                        SDL_FreeSurface(textSurface3);
+                        SDL_DestroyTexture(textTexture3);
+
+                        SDL_FreeSurface(textSurface4);
+                        SDL_DestroyTexture(textTexture4);
+
+                        SDL_FreeSurface(textSurface5);
+                        SDL_DestroyTexture(textTexture5);
+
+                        SDL_FreeSurface(textSurface6);
+                        SDL_DestroyTexture(textTexture6);
+
+                        SDL_FreeSurface(textSurface7);
+                        SDL_DestroyTexture(textTexture7);
+
+                        SDL_FreeSurface(textSurface8);
+                        SDL_DestroyTexture(textTexture8);
+                        
+                        
+                        TTF_CloseFont(font);
+                        return;
+                        
+                    }
                 }
             }
         }
     }
-
-    SDL_FreeSurface(textSurface);
-        SDL_DestroyTexture(textTexture);
-
-        SDL_FreeSurface(textSurface2);
-        SDL_DestroyTexture(textTexture2);
-
-        SDL_FreeSurface(textSurface3);
-        SDL_DestroyTexture(textTexture3);
-
-        SDL_FreeSurface(textSurface4);
-        SDL_DestroyTexture(textTexture4);
-
-        SDL_FreeSurface(textSurface5);
-        SDL_DestroyTexture(textTexture5);
-
-        SDL_FreeSurface(textSurface6);
-        SDL_DestroyTexture(textTexture6);
-
-        SDL_FreeSurface(textSurface7);
-        SDL_DestroyTexture(textTexture7);
-
-        SDL_FreeSurface(textSurface8);
-        SDL_DestroyTexture(textTexture8);
-        
-        
-        TTF_CloseFont(font);
 }
 int main(int argc, char const *argv[])
 {
@@ -582,6 +718,8 @@ void cpuLoop()
     Uint8 currentKeyPressed = 255;
     Uint16 opcode;
 
+    
+
     //initialize SDL and store the result
     initSDL(&window, &renderer);
 
@@ -591,6 +729,9 @@ void cpuLoop()
     //draw starting ui screen
     Uint8* objects;
     startingUi(window, renderer, &sChip8Mode, &xoChipMode, &chip8HdMode, &chip10Mode, &chip8IMode, &chip8EMode, &chip8XMode);
+
+    #define x (opcode & 0x0F00) >> 8
+    #define y (opcode & 0x00F0) >> 4
 
     //configure chip8 versions according to flags
     if(sChip8Mode)
