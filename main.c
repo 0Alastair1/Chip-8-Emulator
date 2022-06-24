@@ -736,7 +736,7 @@ void cpuLoop()
     Uint16 PC;
     Uint8 SP;
     Uint8* memory;
-    Uint8 V[16];
+    Uint16 V[16];
     Uint16 stack[32];
     Uint8 delayTimer;
     Uint8 soundTimer;
@@ -784,6 +784,10 @@ void cpuLoop()
 
     //configure chip8 versions according to flags
     if(sChip8Mode)
+    {
+        mode12864 = false;
+    }
+    if(xoChipMode)
     {
         mode12864 = false;
     }
@@ -1133,7 +1137,7 @@ void cpuLoop()
 
                 PC += 2;
     
-                V[x] += V[y];
+                V[x] = (V[x] + V[y]) & 0xFF;
             }
 
             //5XY2
@@ -1181,7 +1185,7 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[x] = kk;
+                V[x] = kk & 0xFF;
 
             }
 
@@ -1190,7 +1194,7 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[x] += kk;
+                V[x] = (V[x] + kk) & 0xFF;
             }
 
             //8XY0
@@ -1246,8 +1250,8 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = ((V[x] + V[y]) > 0xFF) ? 1 : 0;
-                V[x] = (V[x] + V[y]); //checkme
+                V[0xF] |= ((V[x] + V[y]) > 0xFF) ? 1 : 0;
+                V[x] = (V[x] + V[y]) & 0xFF; //checkme
             }
 
             //8XY5
@@ -1255,8 +1259,8 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = (V[y] > V[x]) ? 0 : 1;
-                V[x] = V[x] - V[y];
+                V[0xF] |= (V[y] > V[x]) ? 0 : 1;
+                V[x] = (V[x] - V[y]) &  0xFF;
             }
 
             //8XY6
@@ -1264,12 +1268,12 @@ void cpuLoop()
             {
                 PC += 2;
 
-                if(!sChip8Mode)
+                if(!sChip8Mode && !xoChipMode)//check
                 {
                     V[x] = V[y];
                 }
                 
-                V[0xF] = (V[x] & 0x1) ? 1 : 0;
+                V[0xF] |= (V[x] & 0x1) ? 1 : 0;
                 V[x] >>= 1;
             }
 
@@ -1278,8 +1282,8 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = (V[x] > V[y]) ? 0 : 1;
-                V[x] = V[y] - V[x];
+                V[0xF] |= (V[x] > V[y]) ? 0 : 1;
+                V[x] = (V[y] - V[x]) & 0xFF;
             }
 
             //8XYE
@@ -1287,13 +1291,13 @@ void cpuLoop()
             {
                 PC += 2;
 
-                if(!sChip8Mode)
+                if(!sChip8Mode && !xoChipMode)//check
                 {
                     V[x] = V[y];
                 }
 
-                V[0xF] = (V[x] >> 7) & 0x1;
-                V[x] <<= 1;
+                V[0xF] |= (V[x] >> 7) & 0x1;
+                V[x] = (V[x] << 1) &  0xFF;
             }
             
             //9XY0
@@ -1313,8 +1317,8 @@ void cpuLoop()
                 PC += 2;
                 
                 //check me
-                V[0xF] = (V[x] * V[y]) >> 8;
-                V[x] = V[x] * V[y];
+                V[0xF] |= (V[x] * V[y]) >> 8;
+                V[x] = (V[x] * V[y]) & 0xFF;
 
             }
 
@@ -1323,8 +1327,8 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = V[x] % V[y];
-                V[x] = V[x] / V[y];
+                V[0xF] |= V[x] % V[y];
+                V[x] = (V[x] / V[y]) & 0xFF;
             }
 
             //9XY3 - extended
@@ -1480,7 +1484,7 @@ void cpuLoop()
                                     //check if pixel is already set
                                     if(screen[V[x] + col][V[y] + row] == 1)
                                     {
-                                        V[0xF] = 1;
+                                        V[0xF] |= 1;
                                         screen[V[x] + col][V[y] + row] = 0;
                                     }
                                     else
@@ -1495,7 +1499,7 @@ void cpuLoop()
                                 if(!mode12864) {
                                     if(screen[(V[x] + col) % 64][(V[y] + row) % 32] == 1)
                                     {
-                                        V[0xF] = 1;
+                                        V[0xF] |= 1;
                                         screen[(V[x] + col) % 64][(V[y] + row) % 32] = 0;
                                     }
                                     else
@@ -1506,7 +1510,7 @@ void cpuLoop()
                                 else{
                                     if(screen[(V[x] + col) % 128][(V[y] + row) % 64] == 1)
                                     {
-                                        V[0xF] = 1;
+                                        V[0xF] |= 1;
                                         screen[(V[x] + col) % 128][(V[y] + row) % 64] = 0;
                                     }
                                     else
@@ -1741,7 +1745,7 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = (I + V[x]) > 0xFFF ? 1 : 0; //qwerk checkme
+                V[0xF] |= (I + V[x]) > 0xFFF ? 1 : 0; //qwerk checkme
                 I += V[x];
             }
 
