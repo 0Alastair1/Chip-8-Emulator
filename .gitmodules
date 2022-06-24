@@ -10,3 +10,6 @@
 [submodule "Vendor/SDL_ttf"]
 	path = Vendor/SDL_ttf
 	url = https://github.com/libsdl-org/SDL_ttf
+[submodule "Vendor/plibsys"]
+	path = Vendor/plibsys
+	url = https://github.com/saprykin/plibsys

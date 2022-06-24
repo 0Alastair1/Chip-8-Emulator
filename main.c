@@ -48,11 +48,13 @@
 #include <string.h>
 #include <locale.h>
 
-#include "Vendor/tinyfd/tinyfiledialogs.h"
+#include "tinyfiledialogs.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
+
+#include <plibsys.h>
 
 #define Uint8 uint8_t
 #define Uint16 uint16_t
@@ -175,12 +177,15 @@ void initSDL(SDL_Window** window, SDL_Renderer** renderer)
     *window = SDL_CreateWindow("Chip-8 Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_s * scale, height_s * scale, SDL_WINDOW_SHOWN);
     *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
 
+    SDL_ShowCursor(SDL_ENABLE);
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+    SDL_SetWindowGrab(*window, SDL_FALSE);
+
     return;
 }
 
 Uint8* data;
 uint32_t size;
-
 void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bool* xoChipMode,
     bool* chip8HdMode, bool* chip10Mode, bool* chip8IMode, bool* chip8EMode, bool* chip8XMode)
 {
@@ -306,6 +311,7 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
     //todo recently used files
     //todo save config
 
+    SDL_Event test_event;
     while(true)
     {
         //draw ui
@@ -380,129 +386,134 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
 
         //input
         //get mouse clicks
-        SDL_Event event;
-        SDL_PollEvent(&event);
-        if(event.type == SDL_QUIT)
-        {
-            exit(0);
-        }
-        //mouse left click
-        if(event.type == SDL_MOUSEBUTTONDOWN)
-        {
-            int mouseX; 
-            int mouseY;
-            if(event.button.button == SDL_BUTTON_LEFT)
-            {
-                //handle inputs
-                SDL_GetMouseState(&mouseX, &mouseY);
-                if(mouseX >= 0 && mouseX <= width_s * scale && mouseY >= 0 && mouseY <= height_s * scale)
-                {
-                    //check if any button was clicked
-                    for(int i = 0; i < 8; i++)
-                    {
-                        if(mouseX >= buttons[i]->x - 10 && mouseX <= buttons[i]->x + buttons[i]->w + 200 && mouseY >= buttons[i]->y - 10 && mouseY <= buttons[i]->y + buttons[i]->h + 10)
+        bool mouseclicked = false;
+        while (SDL_PollEvent(&test_event)) {
+            
+            switch (test_event.type) {
+
+                case SDL_QUIT:
+                    exit(0);
+                    break;
+
+                case SDL_MOUSEBUTTONUP:
+                    int mouseX; 
+                    int mouseY;
+                    //handle inputs
+                        SDL_GetMouseState(&mouseX, &mouseY);
+                        if(mouseX >= 0 && mouseX <= width_s * scale && mouseY >= 0 && mouseY <= height_s * scale)
                         {
-                            selectedMode[i] = !selectedMode[i];
-                            for(int j = 0; j < 8; j++)
+                            //check if any button was clicked
+                            for(int i = 0; i < 8; i++)
                             {
-                                if(j != i)
+                                if(mouseX >= buttons[i]->x - 10 && mouseX <= buttons[i]->x + buttons[i]->w + 200 && mouseY >= buttons[i]->y - 10 && mouseY <= buttons[i]->y + buttons[i]->h + 10)
                                 {
-                                    selectedMode[j] = false;
+                                    selectedMode[i] = !selectedMode[i];
+                                    for(int j = 0; j < 8; j++)
+                                    {
+                                        if(j != i)
+                                        {
+                                            selectedMode[j] = false;
+                                        }
+                                    }
                                 }
                             }
+
+                            if(mouseX >= openFileButton.x - 10 && mouseX <= openFileButton.x + openFileButton.w + 200 && mouseY >= openFileButton.y - 10 && mouseY <= openFileButton.y + openFileButton.h + 10)
+                            {
+                                char* filepath = openFile();
+                                struct file file = readFile(filepath);
+                                data = file.data;
+                                size = file.size;
+                                ready = true;       
+                            }
+
+                            if(mouseX >= playButton.x - 10 && mouseX <= playButton.x + playButton.w + 200 && mouseY >= playButton.y - 10 && mouseY <= playButton.y + playButton.h + 10 && ready)
+                            {
+                                if(selectedMode[0])
+                                {
+
+                                }
+                                if(selectedMode[1])
+                                {
+                                    //sChip mode
+                                    *sChip8Mode = true;
+
+                                }
+                                if(selectedMode[2])
+                                {
+                                    //xoChip mode
+                                    *xoChipMode = true;
+
+                                }
+                                if(selectedMode[3])
+                                {
+                                    //chip8HD mode
+                                    *chip8HdMode = true;
+                                    
+                                }
+                                if(selectedMode[4])
+                                {
+                                    //chip10 mode
+                                    *chip10Mode = true;
+                                    
+                                }
+                                if(selectedMode[5])
+                                {
+                                    //chip8I mode
+                                    *chip8IMode = true;
+                                    
+                                }
+                                if(selectedMode[6])
+                                {
+                                    //chip8E mode
+                                    *chip8EMode = true;
+                                    
+                                }
+                                if(selectedMode[7])
+                                {
+                                    //chip8X mode
+                                    *chip8XMode = true;
+                                    
+                                }
+
+                                SDL_RenderClear(renderer);
+                                SDL_FreeSurface(textSurface);
+                                SDL_DestroyTexture(textTexture);
+
+                                SDL_FreeSurface(textSurface2);
+                                SDL_DestroyTexture(textTexture2);
+
+                                SDL_FreeSurface(textSurface3);
+                                SDL_DestroyTexture(textTexture3);
+
+                                SDL_FreeSurface(textSurface4);
+                                SDL_DestroyTexture(textTexture4);
+
+                                SDL_FreeSurface(textSurface5);
+                                SDL_DestroyTexture(textTexture5);
+
+                                SDL_FreeSurface(textSurface6);
+                                SDL_DestroyTexture(textTexture6);
+
+                                SDL_FreeSurface(textSurface7);
+                                SDL_DestroyTexture(textTexture7);
+
+                                SDL_FreeSurface(textSurface8);
+                                SDL_DestroyTexture(textTexture8);
+                                
+                                
+                                TTF_CloseFont(font);
+                                return;
+                                
+                            }
                         }
-                    }
+                        break;
 
-                    if(mouseX >= openFileButton.x - 10 && mouseX <= openFileButton.x + openFileButton.w + 200 && mouseY >= openFileButton.y - 10 && mouseY <= openFileButton.y + openFileButton.h + 10)
-                    {
-                        char* filepath = openFile();
-                        struct file file = readFile(filepath);
-                        data = file.data;
-                        size = file.size;
-                        ready = true;       
-                    }
+                    default:
+                        break;
 
-                    if(mouseX >= playButton.x - 10 && mouseX <= playButton.x + playButton.w + 200 && mouseY >= playButton.y - 10 && mouseY <= playButton.y + playButton.h + 10 && ready)
-                    {
-                        if(selectedMode[0])
-                        {
-
-                        }
-                        if(selectedMode[1])
-                        {
-                            //sChip mode
-                            *sChip8Mode = true;
-
-                        }
-                        if(selectedMode[2])
-                        {
-                            //xoChip mode
-                            *xoChipMode = true;
-
-                        }
-                        if(selectedMode[3])
-                        {
-                            //chip8HD mode
-                            *chip8HdMode = true;
-                            
-                        }
-                        if(selectedMode[4])
-                        {
-                            //chip10 mode
-                            *chip10Mode = true;
-                            
-                        }
-                        if(selectedMode[5])
-                        {
-                            //chip8I mode
-                            *chip8IMode = true;
-                            
-                        }
-                        if(selectedMode[6])
-                        {
-                            //chip8E mode
-                            *chip8EMode = true;
-                            
-                        }
-                        if(selectedMode[7])
-                        {
-                            //chip8X mode
-                            *chip8XMode = true;
-                            
-                        }
-
-                        SDL_RenderClear(renderer);
-                        SDL_FreeSurface(textSurface);
-                        SDL_DestroyTexture(textTexture);
-
-                        SDL_FreeSurface(textSurface2);
-                        SDL_DestroyTexture(textTexture2);
-
-                        SDL_FreeSurface(textSurface3);
-                        SDL_DestroyTexture(textTexture3);
-
-                        SDL_FreeSurface(textSurface4);
-                        SDL_DestroyTexture(textTexture4);
-
-                        SDL_FreeSurface(textSurface5);
-                        SDL_DestroyTexture(textTexture5);
-
-                        SDL_FreeSurface(textSurface6);
-                        SDL_DestroyTexture(textTexture6);
-
-                        SDL_FreeSurface(textSurface7);
-                        SDL_DestroyTexture(textTexture7);
-
-                        SDL_FreeSurface(textSurface8);
-                        SDL_DestroyTexture(textTexture8);
-                        
-                        
-                        TTF_CloseFont(font);
-                        return;
-                        
-                    }
-                }
             }
+
         }
     }
 }
@@ -679,6 +690,9 @@ void inputs()
     }
 }
 
+SDL_Window* window;
+SDL_Renderer* renderer;
+
 void cpuLoop()
 {
     Uint16 PC;
@@ -691,8 +705,7 @@ void cpuLoop()
     struct strangeTypeSizes typeSizesStruct;
     bool ETI660Mode = false;
 
-    SDL_Window* window;
-    SDL_Renderer* renderer;
+    
 
     bool sChip8Mode = false;
 
@@ -724,6 +737,8 @@ void cpuLoop()
     initSDL(&window, &renderer);
 
     SDL_ShowWindow(window);
+
+    p_libsys_init();
 
     //fixme get flags from user input
     //draw starting ui screen
@@ -1768,11 +1783,16 @@ void cpuLoop()
 
     return;
 }
+char* filepath;
 
+void fileDialog()
+{
+    filepath = tinyfd_openFileDialog("open game", "", 0, NULL, NULL, 0);
+}
 
 char* openFile()
 {
-    char* filepath = malloc(64);
+    filepath = malloc(64);
     #ifdef _WIN32
         OPENFILENAME  ofn;        
         memset(&ofn,0,sizeof(ofn));
@@ -1784,13 +1804,26 @@ char* openFile()
         ofn.Flags           = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
     #else
-        //no gui D:fixme
+        /*
         printf("Please enter the filepath: ");
         #ifdef __STDC_LIB_EXT1__
             scanf_s("%s", filepath, 64);
         #else
         scanf("%s", filepath);
         #endif
+        */
+        //tiny file dialog
+
+        filepath = "";
+        p_uthread_create((void*)fileDialog, NULL, true, NULL);
+
+        
+        while(filepath == "")
+        {
+            SDL_Delay(10);
+            SDL_RenderPresent(renderer);
+        }
+
     #endif
 
     if(!strlen(filepath))
