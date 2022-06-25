@@ -1,6 +1,5 @@
 
 #if defined(_WIN32) || defined(_WIN64)
-    #include <windows.h>
     #include <malloc.h>
     #define swap_16(x) _byteswap_ushort(x)
     #define swap_32(x) _byteswap_ulong(x)
@@ -49,10 +48,10 @@
 #include <locale.h>
 
 #include "tinyfiledialogs.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_mixer.h>
+
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include <plibsys.h>
 
@@ -136,6 +135,11 @@ char* openFile();
 struct file readFile(char*);
 void writeFont();
 
+int main()
+{
+    cpuLoop();
+    return 0;
+}
 
 #define width_s 128
 #define height_s 64
@@ -391,7 +395,6 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
 
         //input
         //get mouse clicks
-        bool mouseclicked = false;
         while (SDL_PollEvent(&test_event)) {
             
             switch (test_event.type) {
@@ -532,13 +535,6 @@ void startingUi(SDL_Window* window, SDL_Renderer* renderer, bool* sChip8Mode, bo
 
         }
     }
-}
-int main(int argc, char const *argv[])
-{
-
-    
-    cpuLoop();
-    return 0;
 }
 
 void inputs()
@@ -741,8 +737,8 @@ void cpuLoop()
     Uint8* memory;
     Uint16 V[16];
     Uint16 stack[32];
-    Uint8 delayTimer;
-    Uint8 soundTimer;
+    Uint16 delayTimer;
+    Uint16 soundTimer;
     struct strangeTypeSizes typeSizesStruct;
     bool ETI660Mode = false;
 
@@ -779,7 +775,6 @@ void cpuLoop()
     p_libsys_init();
 
     //draw starting ui screen
-    Uint8* objects;
     startingUi(window, renderer, &sChip8Mode, &xoChipMode, &chip8HdMode, &chip10Mode, &chip8IMode, &chip8EMode, &chip8XMode);
 
     #define x (opcode & 0x0F00) >> 8
@@ -1253,8 +1248,8 @@ void cpuLoop()
             {
                 PC += 2;
 
-                Uint8 ex = V[x];
-                Uint8 ey = V[y];
+                Uint16 ex = V[x];
+                Uint16 ey = V[y];
 
                 V[x] = (V[x] + V[y]) & 0xFF; //checkme
                 //vf order checkme
@@ -1268,8 +1263,8 @@ void cpuLoop()
             { 
                 PC += 2;
 
-                Uint8 ex = V[x];
-                Uint8 ey = V[y];
+                Uint16 ex = V[x];
+                Uint16 ey = V[y];
 
                 //vf order checkme
                 V[x] = (V[x] - V[y]) & 0xFF;
@@ -1288,7 +1283,7 @@ void cpuLoop()
                     V[x] = V[y];
                 }
 
-                Uint8 ex = V[x];
+                Uint16 ex = V[x];
                 
                 //vf order checkme
                 V[x] >>= 1;
@@ -1300,8 +1295,8 @@ void cpuLoop()
             {
                 PC += 2;
 
-                Uint8 ex = V[x];
-                Uint8 ey = V[y];
+                Uint16 ex = V[x];
+                Uint16 ey = V[y];
 
                 //vf order checkme
                 V[x] = (V[y] - V[x]) & 0xFF;
@@ -1319,7 +1314,7 @@ void cpuLoop()
                     V[x] = V[y];
                 }
 
-                Uint8 ex = V[x];
+                Uint16 ex = V[x];
 
 
                 //vf order checkme
@@ -1549,9 +1544,9 @@ void cpuLoop()
                             
                         }
                     }
-                    rowBreak:
+                    rowBreak:;
                 }
-                spriteBreak:
+                spriteBreak:;
             }
 
             //EX9E
@@ -1977,17 +1972,6 @@ void fileDialog()
 char* openFile()
 {
     filepath = malloc(64);
-    #ifdef _WIN32
-        OPENFILENAME  ofn;        
-        memset(&ofn,0,sizeof(ofn));
-        ofn.lStructSize     = sizeof(ofn);
-        ofn.hwndOwner       = NULL; 
-        ofn.lpstrFile       = filepath;
-        ofn.nMaxFile        = MAX_PATH;
-        ofn.lpstrTitle      = L"Open File";
-        ofn.Flags           = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-
-    #else
 
         filepath = "";
         p_uthread_create((void*)fileDialog, NULL, true, NULL);
@@ -2006,8 +1990,6 @@ char* openFile()
             printf("filepath is null\n");
             return 0x0;
         }
-
-    #endif
 
     if(!strlen(filepath))
     {
@@ -2039,7 +2021,8 @@ struct file readFile(char* filepath)
     fseek(fp, 0, SEEK_END);
     file.size = ftell(fp) + 1;
 
-    Uint8* fileContent = malloc(file.size) + 1;
+    size_t size = ftell(fp) + 2;
+    uint8_t* fileContent = malloc(size);
 
     fseek(fp, 0, SEEK_SET);
     fread(fileContent, 1, file.size, fp);

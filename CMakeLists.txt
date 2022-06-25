@@ -10,9 +10,9 @@ add_subdirectory(Vendor/SDL_image)
 add_subdirectory(Vendor/SDL_ttf)
 add_subdirectory(Vendor/plibsys)
 
-add_executable(Chip-8-Emulator main.c Vendor/tinyfd/tinyfiledialogs.c)
+add_executable(Chip-8-Emulator emulator.c Vendor/tinyfd/tinyfiledialogs.c)
 
-include_directories(Chip-8-Emulator PRIVATE Vendor/SDL2/include Vendor/SDL_image/ Vendor/SDL_ttf/ Vendor/tinyfd/ )
+include_directories(Chip-8-Emulator PRIVATE Vendor/SDL_ttf/ Vendor/SDL2/include/ Vendor/SDL_image/ Vendor/SDL_ttf/ Vendor/tinyfd/ )
 
 target_link_libraries(Chip-8-Emulator SDL2-static)
 target_link_libraries(Chip-8-Emulator SDL2_image)
