@@ -75,6 +75,8 @@
 #define byteFirst (opcode & 0xFF00) >> 8
 #define byteLast kk
 
+PMutex* mutex;
+
 inline bool isLittleEndian()
 {
     Uint16 val = 0xFF00;
@@ -138,6 +140,8 @@ void writeFont();
 
 int main()
 {
+    p_libsys_init();
+    mutex = p_mutex_new();
     cpuLoop();
     return 0;
 }
@@ -740,7 +744,8 @@ void cpuLoop()
     Uint16 stack[32];
     Uint16 delayTimer;
     Uint16 soundTimer;
-    struct strangeTypeSizes typeSizesStruct;
+    
+    struct strangeTypeSizes typeSizesStruct = {.i = 0, .blue = 0, .black = 0, .green = 0, .red = 0};
     bool ETI660Mode = false;
 
     
@@ -773,7 +778,6 @@ void cpuLoop()
 
     SDL_ShowWindow(window);
 
-    p_libsys_init();
 
     //draw starting ui screen
     startingUi(window, renderer, &sChip8Mode, &xoChipMode, &chip8HdMode, &chip10Mode, &chip8IMode, &chip8EMode, &chip8XMode);
@@ -1967,30 +1971,44 @@ char* filepath;
 
 void fileDialog()
 {
-    filepath = tinyfd_openFileDialog("open game", "", 0, NULL, NULL, 0);
+    char* tempFilePath = malloc(sizeof(char) * 64);
+    tempFilePath = tinyfd_openFileDialog("open game", "", 0, NULL, NULL, 0);
+
+    p_mutex_lock(mutex);
+    filepath = tempFilePath;
+    p_mutex_unlock(mutex);
 }
 
 char* openFile()
 {
-    filepath = malloc(64);
+    filepath = malloc(sizeof(char) * 64);
 
-        filepath = "";
-        p_uthread_create((void*)fileDialog, NULL, true, NULL);
+    filepath = "";
 
-
-        while(filepath == "")
+    fileDialog();
+    /* broken on windows for some reason 
+    PUThread* thread = p_uthread_create((void*)fileDialog, NULL, true, NULL);
+    while(true)
+    {
+        p_mutex_lock(mutex);
+        if(strlen(filepath) > 3)
         {
-            SDL_Delay(10);
-            SDL_RenderPresent(renderer);
+            p_mutex_unlock(mutex);
+            p_uthread_join(thread, NULL);
+            break;
 
-            
         }
+        p_mutex_unlock(mutex);
+        
+        SDL_Delay(100);
+        SDL_RenderPresent(renderer);
+    }*/
 
-        if(filepath == NULL || filepath == 0x0)
-        {
-            printf("filepath is null\n");
-            return 0x0;
-        }
+    if(filepath == NULL || filepath == 0x0)
+    {
+        printf("filepath is null\n");
+        return 0x0;
+    }
 
     if(!strlen(filepath))
     {
