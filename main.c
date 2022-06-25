@@ -1214,7 +1214,7 @@ void cpuLoop()
             {
                 PC += 2;
 
-                if(!sChip8Mode && !xoChipMode)
+                if(!sChip8Mode && !xoChipMode)//xoChipMode supposed to be here? && //vf order??
                 {
                     V[0xF] = 0;
                 }
@@ -1227,7 +1227,7 @@ void cpuLoop()
             {
                 PC += 2;
 
-                if(!sChip8Mode && !xoChipMode)
+                if(!sChip8Mode && !xoChipMode)//vf order??
                 {
                     V[0xF] = 0;
                 }
@@ -1240,7 +1240,7 @@ void cpuLoop()
             {
                 PC += 2;
 
-                if(!sChip8Mode && !xoChipMode)
+                if(!sChip8Mode && !xoChipMode)//vf order??
                 {
                     V[0xF] = 0;
                 }
@@ -1253,17 +1253,29 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = ((V[x] + V[y]) > 0xFF) ? 1 : 0;
+                Uint8 ex = V[x];
+                Uint8 ey = V[y];
+
                 V[x] = (V[x] + V[y]) & 0xFF; //checkme
+                //vf order checkme
+                V[0xF] = ((ex + ey) > 0xFF) ? 1 : 0;
+                
             }
+
 
             //8XY5
             else if(numFirst == 0x8 && numLast == 0x5)
-            {
+            { 
                 PC += 2;
 
-                V[0xF] = (V[y] > V[x]) ? 0 : 1;
-                V[x] = (V[x] - V[y]) &  0xFF;
+                Uint8 ex = V[x];
+                Uint8 ey = V[y];
+
+                //vf order checkme
+                V[x] = (V[x] - V[y]) & 0xFF;
+                V[0xF] = (ex >= ey) ? 1 : 0;
+                
+                
             }
 
             //8XY6
@@ -1275,9 +1287,12 @@ void cpuLoop()
                 {
                     V[x] = V[y];
                 }
+
+                Uint8 ex = V[x];
                 
-                V[0xF] = (V[x] & 0x1) ? 1 : 0;
+                //vf order checkme
                 V[x] >>= 1;
+                V[0xF] = (ex & 0x1) ? 1 : 0;
             }
 
             //8XY7
@@ -1285,8 +1300,13 @@ void cpuLoop()
             {
                 PC += 2;
 
-                V[0xF] = (V[x] > V[y]) ? 0 : 1;
+                Uint8 ex = V[x];
+                Uint8 ey = V[y];
+
+                //vf order checkme
                 V[x] = (V[y] - V[x]) & 0xFF;
+                V[0xF] = (ey >= ex) ? 1 : 0;
+                
             }
 
             //8XYE
@@ -1299,8 +1319,12 @@ void cpuLoop()
                     V[x] = V[y];
                 }
 
-                V[0xF] = (V[x] >> 7) & 0x1;
+                Uint8 ex = V[x];
+
+
+                //vf order checkme
                 V[x] = (V[x] << 1) &  0xFF;
+                V[0xF] = (ex >> 7) & 0x1;
             }
             
             //9XY0
