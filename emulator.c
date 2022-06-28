@@ -186,6 +186,7 @@ union
 #pragma pop()
 
 /* todo make a debugger window */
+/* todo make io window */
 
 void initSDL(window, renderer)
 SDL_Window** window;
@@ -764,7 +765,7 @@ static void cpuLoop()
     Uint16 delayTimer;
     Uint16 soundTimer;
     
-    struct strangeTypeSizes typeSizesStruct = {.i = 0, .blue = 0, .black = 0, .green = 0, .red = 0};
+    struct strangeTypeSizes typeSizesStruct = {.i = 0, .blue = 0, .black = 1, .green = 0, .red = 0}; //starts in black mode?
     bool ETI660Mode = false;
 
     
@@ -838,8 +839,6 @@ static void cpuLoop()
             }
         }
     }
-
-    /**/
 
     /* copy file data to memory */
     if(size + 1024 < 8192)
@@ -1408,7 +1407,7 @@ static void cpuLoop()
                 memory[I + 1] = (temp / 1000) % 10;
                 memory[I + 2] = (temp / 100) % 10;
                 memory[I + 3] = (temp / 10) % 10;
-                memory[I + 4] = (temp / 1) % 10;
+                memory[I + 4] = (temp / 0x1) % 10;
             }
 
             /* ANNN  */
@@ -1474,7 +1473,7 @@ static void cpuLoop()
             {
                 PC += 2;
 
-                V[x] = (rand() % 0xFF + 1) & kk;
+                V[x] = (rand() % 0xFF + 0x1) & kk;
 
             }
 
@@ -1483,7 +1482,51 @@ static void cpuLoop()
             {
                 PC += 2;
                 
-                /* todo later  */
+                if(mode12864)
+                {
+                    V[0xF] = 0;
+
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+                    /* draw 16x16 sprite from memory  */
+                    size_t row;
+                    for(row = 0; row < 16; row++)
+                    {
+                        size_t col;
+                        for(col = 0; col < 16; col++)
+                        {
+                            if((isTrue(*(Uint16*)&memory[I + row] >> (0xF - col)) & 0x1)) //checkme
+                            {
+                                if( (V[y] + row) >= 64) 
+                                {
+                                    goto endInstruction;
+                                }
+                                else if( (V[y] + col) >= 128) 
+                                {
+                                    break;
+                                }
+                                else if( (V[y] + row) < 0) 
+                                {
+                                    break;
+                                }
+                                else if( (V[y] + col) < 0) 
+                                {
+                                    continue;
+                                }
+                                    
+                                if(screen[V[x] + col][V[y] + row] == 0x1)
+                                {
+                                    V[0xF] = 0x1;
+                                    screen[V[x] + col][V[y] + row] = 0x0;
+                                }
+                                else
+                                {
+                                    screen[V[x] + col][V[y] + row] = 0x1;
+                                }
+                            }
+                        }
+                    }
+                }
 
             }
 
@@ -1498,7 +1541,6 @@ static void cpuLoop()
                 /* render sprite  */
                 SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
        
-
                 /* draw sprite from memory  */
 
                 /* foreach line/byte  */
@@ -1510,9 +1552,8 @@ static void cpuLoop()
                     for(col = 0; col < 8; col++)
                     {
                         /* checks if the bit at index col in the byte is set  */
-                        if( (memory[I + row] >> (7 - col)) & 0x1 ) 
+                        if(isTrue((*(Uint8*)&memory[I + row] >> (0x7 - col)) & 0x1)) 
                         {
-
                             if(!isTrue(xoChipMode))
                             {
                                 /* check if pixel is out of bounds  */
@@ -1521,7 +1562,7 @@ static void cpuLoop()
                                     /* if row of sprite goes out below screen stop drawing sprite  */
                                     if( (V[y] + row) >= 64) 
                                     {
-                                        goto spriteBreak;
+                                        goto endInstruction;
                                     }
                                     /* if the pixel goes out of bounds go to next row  */
                                     else if( (V[y] + col) >= 128) 
@@ -1545,7 +1586,7 @@ static void cpuLoop()
                                 { 
                                     if( (V[y] + row) >= 32) 
                                     {
-                                        goto spriteBreak;
+                                        goto endInstruction;
                                     }
                                     else if( (V[x] + col) >= 64) 
                                     {
@@ -1563,48 +1604,47 @@ static void cpuLoop()
 
                                 /* xor  */
                                 /* check if pixel is already set  */
-                                if(screen[V[x] + col][V[y] + row] == 1)
+                                if(screen[V[x] + col][V[y] + row] == 0x1)
                                 {
                                     V[0xF] = 1;
-                                    screen[V[x] + col][V[y] + row] = 0;
+                                    screen[V[x] + col][V[y] + row] = 0x0;
                                 }
                                 else
                                 {
-                                    screen[V[x] + col][V[y] + row] = 1;
+                                    screen[V[x] + col][V[y] + row] = 0x1;
                                 }
                             }
                             else
                             {
                                 /* xor  */
                                 /* check if pixel is already set  */
-                                if(!mode12864) {
-                                    if(screen[(V[x] + col) % 64][(V[y] + row) % 32] == 1)
+                                if(!isTrue(mode12864)) {
+                                    if(screen[(V[x] + col) % 64][(V[y] + row) % 32] == 0x1)
                                     {
                                         V[0xF] = 1;
-                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 0;
+                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 0x0;
                                     }
                                     else
                                     {
-                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 1;
+                                        screen[(V[x] + col) % 64][(V[y] + row) % 32] = 0x1;
                                     }
                                 }
                                 else
                                 {
-                                    if(screen[(V[x] + col) % 128][(V[y] + row) % 64] == 1)
+                                    if(screen[(V[x] + col) % 128][(V[y] + row) % 64] == 0x1)
                                     {
                                         V[0xF] = 1;
-                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 0;
+                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 0x0;
                                     }
                                     else
                                     {
-                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 1;
+                                        screen[(V[x] + col) % 128][(V[y] + row) % 64] = 0x1;
                                     }
                                 }
                             }
                         }
                     }
                 }
-                spriteBreak:;
             }
 
             /* EX9E  */
@@ -1661,7 +1701,7 @@ static void cpuLoop()
             /* FX0A  */
             else if(numFirst == 0xF && byteLast == 0x0A)
             {
-                if(!isTrue(sChip8Mode && !xoChipMode)) /* fixme - does xoChipMode and other modes use original input here?  */
+                if(!isTrue(sChip8Mode) && !isTrue(xoChipMode)) /* fixme - does xoChipMode and other modes use original input here?  */
                 {
                     inputs();
                     if(keyToggle == false)
@@ -1857,7 +1897,7 @@ static void cpuLoop()
                 /* checkme  */
                 memory[I] = (V[x] / 100) % 10;
                 memory[I + 1] = (V[x] / 10) % 10;
-                memory[I + 2] = (V[x] / 1) % 10;
+                memory[I + 2] = (V[x] / 0x1) % 10;
 
             }
 
@@ -1959,6 +1999,8 @@ static void cpuLoop()
             }
         }
 
+        endInstruction:;
+
         /* GPU */
         int scaled = scale;
         /* check if super mode is enabled */
@@ -2000,7 +2042,7 @@ static void cpuLoop()
             int col;
             for(col = 0; col < 128; col++)
             {
-                if(screen[col][row] == 1)
+                if(screen[col][row] == 0x1)
                 {
                     /* draw pixel */
                     SDL_Rect rect = { col * scaled, row * scaled, scaled, scaled};
