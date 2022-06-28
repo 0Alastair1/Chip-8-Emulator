@@ -14,5 +14,5 @@ include_directories(Chip-8-Emulator PRIVATE Vendor/SDL_ttf/ Vendor/SDL2/include/
 target_link_libraries(Chip-8-Emulator SDL2-static)
 target_link_libraries(Chip-8-Emulator SDL2_ttf)
 
-#set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 90)
-#set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD_REQUIRED ON)
+set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 90)
+set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD_REQUIRED ON)

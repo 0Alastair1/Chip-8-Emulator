@@ -1,4 +1,5 @@
 
+
 #if defined(_WIN32) || defined(_WIN64)
     #include <malloc.h>
     #define swap_16(x) _byteswap_ushort(x)
@@ -147,15 +148,25 @@ int main()
 #define height_s 64
 #define scale 5
 
+#define d_width_s 300
+#define d_height_s 600
+#define d_scale 1
+
 Uint8 lastLastKeyPressed = 255;
 Uint8 lastKeyPressed = 255;
 Uint8 lastKeyUp = 255;
 bool keyToggle = false;
 
 char* filepath;
+TTF_Font* efont;
 
 SDL_Window* window;
 SDL_Renderer* renderer;
+
+SDL_Window* debugWindow;
+SDL_Renderer* debugRenderer;
+
+bool showDebug = false;
 
 #pragma push()
 #pragma pack(1)
@@ -185,8 +196,26 @@ union
 } keyboard;
 #pragma pop()
 
-/* todo make a debugger window */
-/* todo make io window */
+
+/* todo make io window - maybe console? */
+
+int windowSizeX;
+int windowSizeY;
+void createDebugWindow()
+{
+    int ex = 0;
+    int ey = 0;
+    int w = 0;
+    int h = 0;
+    SDL_GetWindowPosition(window, &ex, &ey);
+    SDL_GetWindowSize(window, &w, &h);
+
+    windowSizeX = (d_width_s * d_scale);
+    windowSizeY = (d_height_s * d_scale);
+
+    debugWindow = SDL_CreateWindow("Debug window", ex + w , (ey + (h/2)) - windowSizeY/2 , windowSizeX, windowSizeY, SDL_WINDOW_SHOWN);
+    debugRenderer = SDL_CreateRenderer(debugWindow, -1, SDL_RENDERER_ACCELERATED);
+}
 
 void initSDL(window, renderer)
 SDL_Window** window;
@@ -251,11 +280,17 @@ bool* chip8XMode;
     SDL_Texture* textTexture10;
     SDL_Surface* textSurface10;
 
-    writeFont();
+    SDL_Texture* warnTexture1;
+    SDL_Surface* warnSurface1;
 
-    TTF_Init();
+    SDL_Texture* warnTexture2;
+    SDL_Surface* warnSurface2;
 
-    TTF_Font* font = TTF_OpenFont("chip8emulatorfont.ttf", 24);
+    SDL_Texture* showDebugTexture;
+    SDL_Surface* showDebugSurface;
+
+    SDL_Texture* showDebugTexture1;
+    SDL_Surface* showDebugSurface1;
 
     SDL_Color textColor = {255, 255, 255};
 
@@ -281,35 +316,35 @@ bool* chip8XMode;
     SDL_Rect chip8XModeButton = {buttonsx, spacingy*8 , 10, 10};
 
 
-    textSurface = TTF_RenderText_Solid(font, "CHIP8 MODE", textColor);
+    textSurface = TTF_RenderText_Solid(efont, "CHIP8 MODE", textColor);
     textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_Rect textRect = {buttonsx + spacingx, spacingy, textSurface->w, textSurface->h};
 
-    textSurface2 = TTF_RenderText_Solid(font, "SCHIP MODE", textColor);
+    textSurface2 = TTF_RenderText_Solid(efont, "SCHIP MODE", textColor);
     textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
     SDL_Rect textRect2 = {buttonsx + spacingx, spacingy*2, textSurface2->w, textSurface2->h};
 
-    textSurface3 = TTF_RenderText_Solid(font, "XOCHIP MODE", textColor);
+    textSurface3 = TTF_RenderText_Solid(efont, "XOCHIP MODE", textColor);
     textTexture3 = SDL_CreateTextureFromSurface(renderer, textSurface3);
     SDL_Rect textRect3 = {buttonsx + spacingx, spacingy*3, textSurface3->w, textSurface3->h};
 
-    textSurface4 = TTF_RenderText_Solid(font, "CHIP8HD MODE", textColor);
+    textSurface4 = TTF_RenderText_Solid(efont, "CHIP8HD MODE", textColor);
     textTexture4 = SDL_CreateTextureFromSurface(renderer, textSurface4);
     SDL_Rect textRect4 = {buttonsx + spacingx, spacingy*4, textSurface4->w, textSurface4->h};
 
-    textSurface5 = TTF_RenderText_Solid(font, "CHIP10 MODE", textColor);
+    textSurface5 = TTF_RenderText_Solid(efont, "CHIP10 MODE", textColor);
     textTexture5 = SDL_CreateTextureFromSurface(renderer, textSurface5);
     SDL_Rect textRect5 = {buttonsx + spacingx, spacingy*5, textSurface5->w, textSurface5->h};
 
-    textSurface6 = TTF_RenderText_Solid(font, "CHIP8I MODE", textColor);
+    textSurface6 = TTF_RenderText_Solid(efont, "CHIP8I MODE", textColor);
     textTexture6 = SDL_CreateTextureFromSurface(renderer, textSurface6);
     SDL_Rect textRect6 = {buttonsx + spacingx, spacingy*6, textSurface6->w, textSurface6->h};
 
-    textSurface7 = TTF_RenderText_Solid(font, "CHIP8E MODE", textColor);
+    textSurface7 = TTF_RenderText_Solid(efont, "CHIP8E MODE", textColor);
     textTexture7 = SDL_CreateTextureFromSurface(renderer, textSurface7);
     SDL_Rect textRect7 = {buttonsx + spacingx, spacingy*7, textSurface7->w, textSurface7->h};
 
-    textSurface8 = TTF_RenderText_Solid(font, "CHIP8X MODE", textColor);
+    textSurface8 = TTF_RenderText_Solid(efont, "CHIP8X MODE", textColor);
     textTexture8 = SDL_CreateTextureFromSurface(renderer, textSurface8);
     SDL_Rect textRect8 = {buttonsx + spacingx, spacingy*8, textSurface8->w, textSurface8->h};
 
@@ -324,14 +359,31 @@ bool* chip8XMode;
     #undef x
     #undef y
 
-    SDL_Rect openFileButton = {width /2 - width/3, height/4, 80, 50};
+    warnSurface1 = TTF_RenderText_Solid(efont, "DEBUG WINDOW", textColor);
+    warnTexture1 = SDL_CreateTextureFromSurface(debugRenderer, warnSurface1);
+    SDL_Rect warnRect1 = {(windowSizeX/2)-(warnSurface1->w/2),(windowSizeY/2)-(warnSurface1->h/2), warnSurface1->w, warnSurface1->h};
 
-    textSurface9 = TTF_RenderText_Solid(font, "OPEN FILE", textColor);
+    warnSurface2 = TTF_RenderText_Solid(efont, "DECREASES FPS", textColor);
+    warnTexture2 = SDL_CreateTextureFromSurface(debugRenderer, warnSurface2);
+    SDL_Rect warnRect2 = {(windowSizeX/2)-(warnSurface2->w/2),(windowSizeY/2)-(warnSurface2->h/2) + warnSurface2->h, warnSurface2->w, warnSurface2->h};
+
+    showDebugSurface = TTF_RenderText_Solid(efont, "DEBUG", textColor);
+    showDebugTexture = SDL_CreateTextureFromSurface(renderer, showDebugSurface);
+    SDL_Rect showDebugRect = {0,0, showDebugSurface->w, showDebugSurface->h};
+
+    showDebugSurface1 = TTF_RenderText_Solid(efont, "DEBUG", (SDL_Color){0, 255, 0});
+    showDebugTexture1 = SDL_CreateTextureFromSurface(renderer, showDebugSurface1);
+    SDL_Rect showDebugRect1 = {0,0, showDebugSurface1->w, showDebugSurface1->h};
+
+    
+
+    textSurface9 = TTF_RenderText_Solid(efont, "OPEN FILE", textColor);
     textTexture9 = SDL_CreateTextureFromSurface(renderer, textSurface9);
+    SDL_Rect openFileButton = {width /2 - width/3, height/4,textSurface9->w, textSurface9->h};
 
     SDL_Rect playButton = {width /2 - width/4, height - height/4, 50, 50};
 
-    textSurface10 = TTF_RenderText_Solid(font, "PLAY", textColor);
+    textSurface10 = TTF_RenderText_Solid(efont, "PLAY", textColor);
     textTexture10 = SDL_CreateTextureFromSurface(renderer, textSurface10);
 
     bool ready = false;
@@ -368,9 +420,10 @@ bool* chip8XMode;
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
         
-
+        SDL_SetRenderDrawColor(renderer, 0, 20, 0, 255);
+        SDL_RenderFillRect(renderer, &openFileButton);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderCopy(renderer, textTexture9, NULL, &openFileButton);
 
         if(isTrue(ready))
@@ -412,7 +465,37 @@ bool* chip8XMode;
             selectedMode[0] = true;
         }
 
+        //draw debug button
+        SDL_SetRenderDrawColor(renderer, 0, 20, 0, 20);
+        
+        SDL_RenderFillRect(renderer, &showDebugRect);
+
+        if(showDebug)
+        {
+            SDL_RenderCopy(renderer, showDebugTexture1, NULL, &showDebugRect1);
+        }
+        else
+        {
+            SDL_RenderCopy(renderer, showDebugTexture, NULL, &showDebugRect);
+        }
+        
+
         SDL_RenderPresent(renderer);
+
+        
+
+
+        //clear debugwindow
+        if(isTrue(showDebug))
+        {
+            SDL_SetRenderDrawColor(debugRenderer, 0, 15, 0, 15);
+            SDL_RenderClear(debugRenderer);
+
+            SDL_RenderCopy(debugRenderer, warnTexture1, NULL, &warnRect1);
+            SDL_RenderCopy(debugRenderer, warnTexture2, NULL, &warnRect2);
+        
+            SDL_RenderPresent(debugRenderer);
+        }
 
         /* input */
         /* get mouse clicks */
@@ -420,8 +503,15 @@ bool* chip8XMode;
             
             switch (test_event.type) {
 
-                case SDL_QUIT:
+                case SDL_QUIT: //fixme broken window doenst close
                     exit(0);
+                    break;
+
+                case SDL_KEYDOWN:
+                    if(test_event.key.keysym.sym == SDLK_ESCAPE)
+                    {
+                        exit(0);
+                    }
                     break;
 
                 case SDL_MOUSEBUTTONUP:
@@ -432,6 +522,12 @@ bool* chip8XMode;
                         if(mouseX >= 0 && mouseX <= width_s * scale && mouseY >= 0 && mouseY <= height_s * scale)
                         {
                             /* check if any button was clicked */
+
+                            if(mouseX >= showDebugRect.x && mouseX <= showDebugRect.x + showDebugRect.w && mouseY >= showDebugRect.y && mouseY <= showDebugRect.y + showDebugRect.h)
+                            {
+                                showDebug = !showDebug;
+                            }
+
                             Uint8 i;
                             for(i = 0; i < 8; i++)
                             {
@@ -448,12 +544,14 @@ bool* chip8XMode;
                                     }
                                 }
                             }
+                            
 
-                            if(mouseX >= openFileButton.x - 10 && mouseX <= openFileButton.x + openFileButton.w + 200 && mouseY >= openFileButton.y - 10 && mouseY <= openFileButton.y + openFileButton.h + 10)
+                            if(mouseX >= openFileButton.x - 10 && mouseX <= openFileButton.x + openFileButton.w && mouseY >= openFileButton.y - 10 && mouseY <= openFileButton.y + openFileButton.h + 10)
                             {
                                 openFile();
                                 if(filepath == 0x0)
                                 {
+                                    SDL_free(filepath);
                                     break;
                                 }
                                 struct file file = readFile();
@@ -462,7 +560,7 @@ bool* chip8XMode;
                                 ready = true;       
                             }
 
-                            if(mouseX >= playButton.x - 10 && mouseX <= playButton.x + playButton.w + 200 && mouseY >= playButton.y - 10 && mouseY <= playButton.y + playButton.h + 10 && ready)
+                            if(mouseX >= playButton.x - 10 && mouseX <= playButton.x + playButton.w && mouseY >= playButton.y - 10 && mouseY <= playButton.y + playButton.h + 10 && ready)
                             {
                                 if(isTrue(selectedMode[0]))
                                 {
@@ -542,9 +640,25 @@ bool* chip8XMode;
 
                                 SDL_FreeSurface(textSurface8);
                                 SDL_DestroyTexture(textTexture8);
+
+                                SDL_FreeSurface(textSurface9);
+                                SDL_DestroyTexture(textTexture9);
+
+                                SDL_FreeSurface(textSurface10);
+                                SDL_DestroyTexture(textTexture10);
+
+                                SDL_FreeSurface(warnSurface1);
+                                SDL_DestroyTexture(warnTexture1);
                                 
+                                SDL_FreeSurface(warnSurface2);
+                                SDL_DestroyTexture(warnTexture2);
                                 
-                                TTF_CloseFont(font);
+                                SDL_FreeSurface(showDebugSurface);
+                                SDL_DestroyTexture(showDebugTexture);
+                                
+                                SDL_FreeSurface(showDebugSurface1);
+                                SDL_DestroyTexture(showDebugTexture1);
+                                
                                 return;
                                 
                             }
@@ -556,6 +670,14 @@ bool* chip8XMode;
 
             }
 
+        }
+        if(showDebug)
+        {
+            SDL_ShowWindow(debugWindow);
+        }
+        else
+        {
+            SDL_HideWindow(debugWindow);
         }
     }
 }
@@ -755,6 +877,176 @@ void inputs()
     }
 }
 
+/* fixme debugger really slow */
+SDL_Rect PCRect;
+SDL_Rect SPRect;
+SDL_Rect iRegRect;
+bool firstRun = true;
+SDL_Rect VSCountRect[16];
+
+SDL_Texture* PCTexture;
+SDL_Texture* SPTexture;
+SDL_Texture* iRegTexture;
+SDL_Texture* VSTexture[16];
+
+static void updateDebugWindow(PC, SP, iReg, memory, V, stack, delayTimer, soundTimer)
+Uint16* PC;
+Uint8* SP;
+Uint16* iReg;
+Uint8* memory;
+Uint16* V;
+Uint16* stack;
+Uint8* delayTimer;
+Uint16* soundTimer;
+{
+
+
+    SDL_SetRenderDrawColor(debugRenderer, 0, 15, 0, 15);
+    SDL_RenderClear(debugRenderer);
+
+    static const SDL_Color textColor = {0xFF, 0xFF, 0xFF, 0xFF};
+
+    Uint8 spacing = 100;
+    Uint8 lineSpacing = 30;
+
+    SDL_Surface* surface;
+    SDL_Texture* texture;
+
+    if(firstRun)
+    {
+        firstRun = false;
+
+        //
+        surface = TTF_RenderText_Solid(efont, "PC   ", textColor);
+        PCTexture = SDL_CreateTextureFromSurface(debugRenderer, surface);
+        SDL_Rect PCRect1 = {0, 40, surface->w, surface->h};
+        PCRect = PCRect1;
+
+        SDL_FreeSurface(surface);
+
+        //
+
+        surface = TTF_RenderText_Solid(efont, "SP   ", textColor);
+        SPTexture = SDL_CreateTextureFromSurface(debugRenderer, surface);
+        SDL_Rect SPRect1 = {0, PCRect.y + lineSpacing, surface->w, surface->h};
+        SPRect = SPRect1;
+
+        SDL_FreeSurface(surface);
+
+        //
+
+        surface = TTF_RenderText_Solid(efont, "I    ", textColor);
+        iRegTexture = SDL_CreateTextureFromSurface(debugRenderer, surface);
+        SDL_Rect iRegRect1 = {0, SPRect.y + lineSpacing, SPRect.w + lineSpacing, SPRect.h};
+        iRegRect = iRegRect1;
+
+
+        SDL_FreeSurface(surface);
+
+
+        Uint8 i;
+        for(i = 0; i < 16; i++)
+        {
+            char VCount =0;
+            sprintf(&VCount, "V%d", i);
+
+            surface = TTF_RenderText_Solid(efont, &VCount, textColor);
+            VSTexture[i] = SDL_CreateTextureFromSurface(debugRenderer, surface);
+
+            VSCountRect[i].x = 0;
+            VSCountRect[i].y = iRegRect.y + lineSpacing * (i + 1);
+            VSCountRect[i].w = surface->w;
+            VSCountRect[i].h = surface->h;
+
+
+            SDL_FreeSurface(surface);
+        }
+
+    }
+
+    SDL_RenderCopy(debugRenderer, PCTexture, NULL, &PCRect);
+    SDL_RenderCopy(debugRenderer, SPTexture, NULL, &SPRect);
+    SDL_RenderCopy(debugRenderer, iRegTexture, NULL, &iRegRect);
+
+    {
+        Uint8 i;
+        for(i = 0; i < 16; i++)
+        {
+            SDL_RenderCopy(debugRenderer, VSTexture[i], NULL, &VSCountRect[i]);
+        }
+    }
+
+
+    /* fixme below expensive */
+    char PCValS[5];
+    sprintf(PCValS, "%04X", *PC);
+
+    surface = TTF_RenderText_Solid(efont, &PCValS[0], textColor);
+    texture = SDL_CreateTextureFromSurface(debugRenderer, surface);
+    SDL_Rect PCVal = {spacing, 40, surface->w, surface->h};
+
+    SDL_RenderCopy(debugRenderer, texture, NULL, &PCVal);
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+    
+    char SPValS[5];
+    sprintf(SPValS, "%04X", *SP);
+    surface = TTF_RenderText_Solid(efont, SPValS, textColor);
+    texture = SDL_CreateTextureFromSurface(debugRenderer, surface);
+    SDL_Rect SPVal = {spacing, SPRect.y, surface->w, surface->h};
+
+    SDL_RenderCopy(debugRenderer, texture, NULL, &SPVal);
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+
+
+    
+    char iRegValS[5];
+    sprintf(iRegValS, "%04X", *iReg);
+    surface = TTF_RenderText_Solid(efont, iRegValS, textColor);
+    texture = SDL_CreateTextureFromSurface(debugRenderer, surface);
+    SDL_Rect iRegVal = {spacing, iRegRect.y, surface->w, surface->h};
+
+    SDL_RenderCopy(debugRenderer, texture, NULL, &iRegVal);
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+
+
+    char VValS[5];
+    int i;
+    for (i = 0; i < 16; i++)
+    {        
+
+        sprintf(VValS, "%02X", V[i]);
+
+        surface = TTF_RenderText_Solid(efont, VValS, textColor);
+        texture = SDL_CreateTextureFromSurface(debugRenderer, surface);
+        SDL_Rect VVal = {spacing, VSCountRect[i].y , surface->w, surface->h};
+
+        SDL_RenderCopy(debugRenderer, texture, NULL, &VVal);
+
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(texture);
+
+    }
+
+    /* stack */
+
+    /* delayTimer */
+
+
+    /* soundTimer */
+
+    /* todo make pause button, maybe rewind button, and forward button, and simulate w key press button */
+
+    /* Draw */
+    SDL_RenderPresent(debugRenderer);
+
+}
+
 static void cpuLoop()
 {
     Uint16 PC;
@@ -765,7 +1057,7 @@ static void cpuLoop()
     Uint16 delayTimer;
     Uint16 soundTimer;
     
-    struct strangeTypeSizes typeSizesStruct = {.i = 0, .blue = 0, .black = 1, .green = 0, .red = 0}; //starts in black mode?
+    struct strangeTypeSizes typeSizesStruct = {0, 0, 1, 0, 0}; //starts in black mode?
     bool ETI660Mode = false;
 
     
@@ -798,6 +1090,22 @@ static void cpuLoop()
 
     SDL_ShowWindow(window);
 
+    writeFont();
+    TTF_Init();
+    efont = TTF_OpenFont("chip8emulatorfont.ttf", 24);
+    
+    //create debugger window
+    createDebugWindow();
+    if(showDebug)
+    {
+        SDL_ShowWindow(debugWindow);
+    }
+    else
+    {
+        SDL_HideWindow(debugWindow);
+    }
+
+    Uint16 iReg = I;
 
     /* draw starting ui screen */
     startingUi(window, renderer, &sChip8Mode, &xoChipMode, &chip8HdMode, &chip10Mode, &chip8IMode, &chip8EMode, &chip8XMode);
@@ -899,8 +1207,12 @@ static void cpuLoop()
             opcode = (*(Uint16*)&memory[PC] & 0xFFFF);
         }
 
-        printf("%04x %04x\n", opcode, PC-0x200);
-        
+        //printf("%04x %04x\n", opcode, PC-0x200);
+        if(showDebug)
+        {
+            updateDebugWindow(&PC, &SP, &iReg, memory, &V, &stack, &delayTimer, &soundTimer);
+        }
+
         /* decode and execute opcode */
 
         {
@@ -2072,7 +2384,7 @@ static void cpuLoop()
 
 static void fileDialog()
 {
-    char* tempFilePath = malloc(sizeof(char) * 64);
+    char* tempFilePath = SDL_malloc(sizeof(char) * 64);
     tempFilePath = tinyfd_openFileDialog("open game", "", 0, NULL, NULL, 0);
 
     filepath = tempFilePath;
@@ -2082,7 +2394,7 @@ static void fileDialog()
 
 static void openFile()
 {
-    filepath = malloc(sizeof(char) * 64);
+    filepath = SDL_malloc(sizeof(char) * 64);
 
     filepath = "";
 
@@ -2122,7 +2434,7 @@ static struct file readFile()
         printf("Can't open file.\n");
         exit(1);
     }
-    free(filepath);
+    SDL_free(filepath);
 
     fseek(fp, 0, SEEK_END);
     file.size = ftell(fp) + 1;
