@@ -1531,44 +1531,52 @@ static void cpuLoop()
             {
                 /* checkme /fixme  */
 
-                if(isTrue(chip8EMode))
+                if(isTrue(chip8XMode))
                 {
                     PC += 2;
         
                     V[x] = (V[x] + V[y]) & 0xFF;
                 }
-                else if(isTrue(chip8XMode))
+
+            }
+
+            /* 5XY2  */
+            else if(numFirst == 0x5 && numLast == 0x2 && (isTrue(chip8EMode)))
+            {
+                PC += 2;
+
+                if(V[x] < V[y])
                 {
-                    /* todo later  */
+                    PC += 2;
                 }
             }
 
             /* 5XY2  */
-            else if(numFirst == 0x5 && numLast == 0x2 && (isTrue(chip8EMode) || isTrue(chip8XMode)))
+            else if(numFirst == 0x5 && numLast == 0x2 && (isTrue(xoChipMode)))
             {
-                if(isTrue(chip8EMode))
-                {
-                    PC += 2;
+                PC += 2;
 
-                    if(V[x] < V[y])
-                    {
-                        PC += 2;
-                    }
-                }
+                memcpy( memory + (sizeof(Uint8) * I), &V[x], (y - x) + 1);
+                
             }
                 
+            /* 5XY3  */
+            else if(numFirst == 0x5 && numLast == 0x2 && (isTrue(xoChipMode)))
+            {
+                PC += 2;
+
+                memcpy( &V[x] ,memory + (sizeof(Uint8) * I), (y - x) + 1);
+                
+            }
             
             /* 5XY3  */
-            else if(numFirst == 0x5 && numLast == 0x3 && (isTrue(chip8EMode) || isTrue(chip8XMode)))
+            else if(numFirst == 0x5 && numLast == 0x3 && (isTrue(chip8EMode)))
             {
-                if(isTrue(chip8EMode))
+                PC += 2;
+
+                if(V[x] != V[y])
                 {
                     PC += 2;
-
-                    if(V[x] != V[y])
-                    {
-                        PC += 2;
-                    }
                 }
             }
 
