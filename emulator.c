@@ -1093,13 +1093,14 @@ Uint16* soundTimer;
 
 static void cpuLoop()
 {
-    Uint16 PC;
-    Uint8 SP;
+    Uint16 PC =0;
+    Uint8 SP =0;
     Uint8* memory;
     Uint16 V[16];
     Uint16 stack[32];
-    Uint16 delayTimer;
-    Uint16 soundTimer;
+    Uint16 delayTimer =0;
+    Uint16 soundTimer =0;
+    Uint16 flags[16];
     
     struct strangeTypeSizes typeSizesStruct = {0, 0, 1, 0, 0}; /* starts in black mode? */
     bool ETI660Mode = false;
@@ -2302,11 +2303,20 @@ static void cpuLoop()
 
                     /* todo later */
                 }
-                else if((isTrue(sChip8Mode) || isTrue(xoChipMode)))
+                else if(isTrue(sChip8Mode))
                 {
                     PC += 2;
 
-                    /* todo later */
+                    if(x < 8)
+                    {
+                        memset(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                    }
+                }
+                else if(isTrue(xoChipMode))
+                {
+                    PC += 2;
+
+                    memset(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
                 }
             }
 
@@ -2314,8 +2324,22 @@ static void cpuLoop()
             /* FX85 */
             else if(numFirst == 0xF && byteLast == 0x85 && (isTrue(sChip8Mode) || isTrue(xoChipMode)))
             {
-                PC += 2;   
-                /*todo later */
+ 
+                if(isTrue(sChip8Mode))
+                {
+                    PC += 2;
+
+                    if(x < 8)
+                    {
+                        memcpy(V, flags, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                    }
+                }
+                else if(isTrue(xoChipMode))
+                {
+                    PC += 2;
+
+                    memcpy(V, flags, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                }
 
             }
 
