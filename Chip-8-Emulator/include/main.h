@@ -83,3 +83,16 @@ struct file{
 char* openFile();
 struct file readFile(char* filepath);
 void writeFont();
+
+#define width_s 128
+#define height_s 64
+#define scale 5
+
+#define d_width_s 300
+#define d_height_s 600
+#define d_scale 1
+
+static void cpuLoop();
+
+void initAudio();
+void closeAudio();

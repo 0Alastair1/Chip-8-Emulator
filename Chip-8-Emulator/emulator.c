@@ -8,7 +8,6 @@ static bool isLittleEndian()
     return *(Uint8*)&val == 0xFF;
 }
 
-
 struct strangeTypeSizes
 {
     struct
@@ -23,7 +22,6 @@ struct strangeTypeSizes
 };
 #define I (typeSizesStruct.i)
 
-
 /* https:/*en.wikipedia.org/wiki/CHIP-8 */
 /* http:/*devernay.free.fr/hacks/chip8/C8TECH10.HTM */
 /* https:/*tobiasvl.github.io/blog/write-a-chip-8-emulator */
@@ -31,7 +29,16 @@ struct strangeTypeSizes
 /* https:/*www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/ */
 /* http:/*www.emulator101.com/chip-8-sprites.html */
 /* https:/*github.com/trapexit/chip-8_documentation/blob/master/README.md */
-/* https:/*github.com/JohnEarnest/Octo/blob/gh-pages/docs/XO-ChipSpecification.md */
+/* https:/*github.com/JohnEarnest/Octo/blob/gh-pages/docs/XO-ChipSpecification.md */                                              
+
+int main()
+{
+    cpuLoop();
+
+    /* todo later close everything */
+    closeAudio();
+    return 0;
+}
 
 /* font */
 const Uint8 font[180] = {
@@ -62,24 +69,7 @@ const Uint8 font[180] = {
     0xFF, 0xFF, 0x03, 0x06, 0x0C, 0x18, 0x30, 0x60, 0x60, 0x60, /* 7 */
     0x3C, 0x7E, 0xC3, 0xC3, 0x7E, 0x7E, 0xC3, 0xC3, 0x7E, 0x3C, /* 8 */
     0x3C, 0x7E, 0xC3, 0xC3, 0x7F, 0x3F, 0x03, 0x03, 0x3E, 0x7C, /* 9 */
-};                                              
-
-
-static void cpuLoop();
-
-int main()
-{
-    cpuLoop();
-    return 0;
-}
-
-#define width_s 128
-#define height_s 64
-#define scale 5
-
-#define d_width_s 300
-#define d_height_s 600
-#define d_scale 1
+};
 
 Uint8 lastLastKeyPressed = 255;
 Uint8 lastKeyPressed = 255;
@@ -96,13 +86,13 @@ SDL_Renderer* debugRenderer;
 
 bool showDebug = false;
 
-#pragma push()
-#pragma pack(1)
+/* #pragma push() */
+/* #pragma pack(1) */
 union
 {
     Uint16 keyboard;
 
-    struct PACKED
+    struct /* PACKED */
     {
         Uint8 key1: 1; 
         Uint8 key2: 1; 
@@ -122,7 +112,7 @@ union
         Uint8 keyF: 1;
     } keys;
 } keyboard;
-#pragma pop()
+/* #pragma pop() */
 
 
 /* todo make io window - maybe console? */
