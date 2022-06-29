@@ -507,6 +507,24 @@ bool* chip8XMode;
                     exit(0);
                     break;
 
+                case SDL_WINDOWEVENT:
+                    switch (test_event.window.event) {
+                        case SDL_WINDOWEVENT_CLOSE:
+                            if(test_event.window.windowID == SDL_GetWindowID(window))
+                            {
+                                exit(0);
+                            }
+                            else if(test_event.window.windowID == SDL_GetWindowID(debugWindow))
+                            {
+                                showDebug = false;
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                    break;
+
                 case SDL_KEYDOWN:
                     if(test_event.key.keysym.sym == SDLK_ESCAPE)
                     {
@@ -692,7 +710,21 @@ void inputs()
         {
             exit(0);
         }
-        
+
+        if(event.window.event == SDL_WINDOWEVENT_CLOSE)
+        {
+
+            if(event.window.windowID == SDL_GetWindowID(window))
+            {
+                exit(0);
+            }
+            else
+            {
+                showDebug = false;
+                //SDL_HideWindow(debugWindow);
+                SDL_DestroyWindow(debugWindow);
+            }         
+        }
 
         if(event.type == SDL_KEYDOWN)
         {
