@@ -465,7 +465,7 @@ bool* chip8XMode;
             selectedMode[0] = true;
         }
 
-        //draw debug button
+        /* draw debug button */
         SDL_SetRenderDrawColor(renderer, 0, 20, 0, 20);
         
         SDL_RenderFillRect(renderer, &showDebugRect);
@@ -482,10 +482,8 @@ bool* chip8XMode;
 
         SDL_RenderPresent(renderer);
 
-        
-
-
-        //clear debugwindow
+    
+        /* update debug window in starting ui */
         if(isTrue(showDebug))
         {
             SDL_SetRenderDrawColor(debugRenderer, 0, 15, 0, 15);
@@ -503,7 +501,7 @@ bool* chip8XMode;
             
             switch (test_event.type) {
 
-                case SDL_QUIT: //fixme broken window doenst close
+                case SDL_QUIT:
                     exit(0);
                     break;
 
@@ -676,6 +674,11 @@ bool* chip8XMode;
                                 
                                 SDL_FreeSurface(showDebugSurface1);
                                 SDL_DestroyTexture(showDebugTexture1);
+
+                                if(!isTrue(showDebug))
+                                {
+                                    SDL_DestroyWindow(debugWindow);
+                                }
                                 
                                 return;
                                 
@@ -689,7 +692,7 @@ bool* chip8XMode;
             }
 
         }
-        if(showDebug)
+        if(isTrue(showDebug))
         {
             SDL_ShowWindow(debugWindow);
         }
@@ -721,7 +724,7 @@ void inputs()
             else
             {
                 showDebug = false;
-                //SDL_HideWindow(debugWindow);
+                /* SDL_HideWindow(debugWindow); */
                 SDL_DestroyWindow(debugWindow);
             }         
         }
@@ -948,7 +951,7 @@ Uint16* soundTimer;
     {
         firstRun = false;
 
-        //
+        
         surface = TTF_RenderText_Solid(efont, "PC   ", textColor);
         PCTexture = SDL_CreateTextureFromSurface(debugRenderer, surface);
         SDL_Rect PCRect1 = {0, 40, surface->w, surface->h};
@@ -956,7 +959,6 @@ Uint16* soundTimer;
 
         SDL_FreeSurface(surface);
 
-        //
 
         surface = TTF_RenderText_Solid(efont, "SP   ", textColor);
         SPTexture = SDL_CreateTextureFromSurface(debugRenderer, surface);
@@ -965,7 +967,6 @@ Uint16* soundTimer;
 
         SDL_FreeSurface(surface);
 
-        //
 
         surface = TTF_RenderText_Solid(efont, "I    ", textColor);
         iRegTexture = SDL_CreateTextureFromSurface(debugRenderer, surface);
@@ -1089,7 +1090,7 @@ static void cpuLoop()
     Uint16 delayTimer;
     Uint16 soundTimer;
     
-    struct strangeTypeSizes typeSizesStruct = {0, 0, 1, 0, 0}; //starts in black mode?
+    struct strangeTypeSizes typeSizesStruct = {0, 0, 1, 0, 0}; /* starts in black mode? */
     bool ETI660Mode = false;
 
     
@@ -1116,7 +1117,6 @@ static void cpuLoop()
     Uint16 opcode;
 
     
-
     /* initialize SDL and store the result */
     initSDL(&window, &renderer);
 
@@ -1126,9 +1126,9 @@ static void cpuLoop()
     TTF_Init();
     efont = TTF_OpenFont("chip8emulatorfont.ttf", 24);
     
-    //create debugger window
+    /* create debugger window */
     createDebugWindow();
-    if(showDebug)
+    if(isTrue(showDebug))
     {
         SDL_ShowWindow(debugWindow);
     }
@@ -1239,7 +1239,7 @@ static void cpuLoop()
             opcode = (*(Uint16*)&memory[PC] & 0xFFFF);
         }
 
-        //printf("%04x %04x\n", opcode, PC-0x200);
+        /* printf("%04x %04x\n", opcode, PC-0x200); */
         if(showDebug)
         {
             updateDebugWindow(&PC, &SP, &iReg, memory, &V, &stack, &delayTimer, &soundTimer);
@@ -1839,7 +1839,7 @@ static void cpuLoop()
                         size_t col;
                         for(col = 0; col < 16; col++)
                         {
-                            if((isTrue(*(Uint16*)&memory[I + row] >> (0xF - col)) & 0x1)) //checkme
+                            if((isTrue(*(Uint16*)&memory[I + row] >> (0xF - col)) & 0x1)) /* checkme */
                             {
                                 if( (V[y] + row) >= 64) 
                                 {
