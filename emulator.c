@@ -2309,14 +2309,14 @@ static void cpuLoop()
 
                     if(x < 8)
                     {
-                        memset(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                        memcpy(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
                     }
                 }
                 else if(isTrue(xoChipMode))
                 {
                     PC += 2;
 
-                    memset(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                    memcpy(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
                 }
             }
 
