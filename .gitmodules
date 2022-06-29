@@ -10,3 +10,6 @@
 [submodule "Vendor/SDL_ttf"]
 	path = Vendor/SDL_ttf
 	url = https://github.com/libsdl-org/SDL_ttf
+[submodule "Vendor/portaudio"]
+	path = Vendor/portaudio
+	url = https://github.com/PortAudio/portaudio
