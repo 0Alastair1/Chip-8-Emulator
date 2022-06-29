@@ -1531,9 +1531,16 @@ static void cpuLoop()
             {
                 /* checkme /fixme  */
 
-                PC += 2;
-    
-                V[x] = (V[x] + V[y]) & 0xFF;
+                if(isTrue(chip8EMode))
+                {
+                    PC += 2;
+        
+                    V[x] = (V[x] + V[y]) & 0xFF;
+                }
+                else if(isTrue(chip8XMode))
+                {
+                    /* todo later  */
+                }
             }
 
             /* 5XY2  */
@@ -1547,11 +1554,6 @@ static void cpuLoop()
                     {
                         PC += 2;
                     }
-                }
-                else{
-                    PC += 2;
-
-                    /* todo later  */
                 }
             }
                 
@@ -1567,12 +1569,6 @@ static void cpuLoop()
                     {
                         PC += 2;
                     }
-                }
-                else{
-
-                    PC += 2;
-
-                    /* todo later  */
                 }
             }
 
@@ -2348,6 +2344,273 @@ static void cpuLoop()
             {
                 PC += 2;
                 /* todo later */
+                /* fix me */
+                /* checkme */
+
+                switch(V[x])
+                {
+                    case 0x00:
+
+                        break;
+
+                    case 0x01:
+                        I = 0x80;
+                        break;
+
+                    case 0x02:
+                        I = 0x85;
+                        break;
+
+                    case 0x03:
+                        I = 0x8A;
+                        break;
+
+                    case 0x04:
+                        I = 0x8F;
+                        break;
+
+                    case 0x05:
+                        I = 0x94;
+                        break;
+
+                    case 0x06:
+                        I = 0x99;
+                        break;
+
+                    case 0x07:
+ 
+                        break;
+
+                    case 0x08:
+
+                        break;
+
+                    case 0x09:
+
+                        break;
+
+                    case 0x0A:
+
+                        break;
+
+                    case 0x0B:
+
+                        break;
+
+                    case 0x0C:
+
+                        break;
+
+                    case 0x0D:
+
+                        break;
+
+                    case 0x0E:
+
+                        break;
+
+                    case 0x0F:
+
+                        break;
+
+                    case 0x10:
+
+                        break;
+
+                    case 0x11:
+
+                        break;
+
+                    case 0x12:
+
+                        break;
+
+                    case 0x13:
+
+                        break;
+
+                    case 0x14:
+
+                        break;
+
+                    case 0x15:
+
+                        break;
+
+                    case 0x16:
+
+                        break;
+
+                    case 0x17:
+
+                        break;
+
+                    case 0x18:
+
+                        break;
+
+                    case 0x19:
+
+                        break;
+
+                    case 0x1A:/**/
+
+                        break;
+
+                    case 0x1B:
+
+                        break;
+
+                    case 0x1C:
+
+                        break;
+
+                    case 0x1D:
+
+                        break;
+
+                    case 0x1E:
+
+                        break;
+
+                    case 0x1F:
+
+                        break;
+
+                    case 0x20:
+
+                        break;
+
+                    case 0x21:
+
+                        break;
+
+                    case 0x22:
+
+                        break;
+
+                    case 0x23:
+
+                        break;
+
+                    case 0x24:
+
+                        break;
+
+                    case 0x25:
+
+                        break;
+
+                    case 0x26:
+
+                        break;
+
+                    case 0x27:
+
+                        break;
+
+                    case 0x28:
+
+                        break;
+
+                    case 0x29:
+
+                        break;
+
+                    case 0x2A:
+
+                        break;
+
+                    case 0x2B:
+
+                        break;
+
+                    case 0x2C:
+
+                        break;
+
+                    case 0x2D:
+
+                        break;
+
+                    case 0x2E:
+
+                        break;
+
+                    case 0x2F:
+
+                        break;
+
+                    case 0x30:
+
+                        I = 0x0;
+                        break;
+
+                    case 0x31:
+                        I = 0x5;
+                        break;
+
+                    case 0x32:
+                        I = 0xA;
+                        break;
+
+                    case 0x33:
+                        I = 0xF;
+                        break;
+
+                    case 0x34:
+                        I = 0x14;
+                        break;
+
+                    case 0x35:
+                        I = 0x19;
+                        break;
+
+                    case 0x36:
+                        I = 0x1E;
+                        break;
+
+                    case 0x37:
+                        I = 0x23;
+                        break;
+
+                    case 0x38:
+                        I = 0x28;
+                        break;
+
+                    case 0x39:
+                        I = 0x2D;
+                        break;
+
+                    case 0x3A:
+
+                        break;
+
+                    case 0x3B:
+
+                        break;
+
+                    case 0x3C:
+
+                        break;
+
+                    case 0x3D:
+
+                        break;
+
+                    case 0x3E:
+
+                        break;
+
+                    case 0x3F:
+
+                        break;
+
+                    default:
+                        break;
+
+                    
+                }
             }
 
             /* FXFB   */
