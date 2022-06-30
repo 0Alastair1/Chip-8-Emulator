@@ -45,6 +45,7 @@
 #include <locale.h>
 
 #include "tinyfiledialogs.h"
+#include <plibsys.h>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>

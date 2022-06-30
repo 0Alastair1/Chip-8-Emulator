@@ -13,3 +13,6 @@
 [submodule "Vendor/portaudio"]
 	path = Vendor/portaudio
 	url = https://github.com/PortAudio/portaudio
+[submodule "Vendor/plibsys"]
+	path = Vendor/plibsys
+	url = https://github.com/saprykin/plibsys
