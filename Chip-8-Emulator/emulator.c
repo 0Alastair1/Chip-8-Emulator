@@ -31,14 +31,6 @@ struct strangeTypeSizes
 /* https:/*github.com/trapexit/chip-8_documentation/blob/master/README.md */
 /* https:/*github.com/JohnEarnest/Octo/blob/gh-pages/docs/XO-ChipSpecification.md */                                              
 
-int main()
-{
-    cpuLoop();
-
-    /* todo later close everything */
-    closeAudio();
-    return 0;
-}
 
 /* font */
 const Uint8 font[180] = {
@@ -999,7 +991,7 @@ Uint16* soundTimer;
 
 }
 
-static void cpuLoop()
+void cpuLoop()
 {
     Uint16 PC =0;
     Uint8 SP =0;

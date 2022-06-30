@@ -8,7 +8,7 @@ add_subdirectory(Vendor/SDL2)
 add_subdirectory(Vendor/SDL_ttf)
 add_subdirectory(Vendor/portaudio)
 
-add_executable(Chip-8-Emulator Chip-8-Emulator/emulator.c Chip-8-Emulator/filehandler.c Vendor/tinyfd/tinyfiledialogs.c Chip-8-Emulator/audio.c)
+add_executable(Chip-8-Emulator Chip-8-Emulator/emulator.c Chip-8-Emulator/main.c Chip-8-Emulator/filehandler.c Vendor/tinyfd/tinyfiledialogs.c Chip-8-Emulator/audio.c)
 
 include_directories(Chip-8-Emulator PRIVATE Chip-8-Emulator/include/ Vendor/SDL_ttf/ Vendor/SDL2/include/ Vendor/SDL_ttf/ Vendor/tinyfd/ Vendor/portaudio/include/)
 

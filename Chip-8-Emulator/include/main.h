@@ -92,7 +92,8 @@ void writeFont();
 #define d_height_s 600
 #define d_scale 1
 
-static void cpuLoop();
+void cpuLoop();
 
 void initAudio();
+void startAudio();
 void closeAudio();
