@@ -98,3 +98,5 @@ void cpuLoop();
 void initAudio();
 void startAudio();
 void closeAudio();
+void muteAudio();
+void unmuteAudio();

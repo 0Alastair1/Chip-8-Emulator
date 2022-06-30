@@ -42,6 +42,8 @@ typedef struct{
     float sampleRate;
     float amplitude;
     waveType wave;
+    bool abort;
+    bool mute;
 
 } dataStruct;
 
@@ -61,6 +63,7 @@ void initAudio()
         exit(1);
     }
 
+    soundData.amplitude = 0.08f;
     soundData.wave = squareWave;
 
     pa_Error = Pa_OpenDefaultStream(&stream, 0, stereo, paFloat32, sampleRate, bufferSize, callback, &soundData);
@@ -72,13 +75,26 @@ void initAudio()
 void startAudio()
 {
     PaError pa_Error = Pa_StartStream(stream);
+    soundData.abort = false;
     peError(pa_Error);
 }
 
 void stopAudio()
 {
-    PaError pa_Error = Pa_StopStream(stream);
+    /*PaError pa_Error = Pa_StopStream(stream);*/
+    PaError pa_Error = Pa_AbortStream(stream);
+    soundData.abort = true;   
     peError(pa_Error);
+}
+
+void muteAudio()
+{
+    soundData.mute = true;
+}
+
+void unmuteAudio()
+{
+    soundData.mute = false;
 }
 
 
@@ -92,6 +108,21 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
     float sampleRate = d->sampleRate;
     float amplitude = d->amplitude;
     
+    if(d->mute)
+    {
+        for(int i = 0; i < frameCount * stereo; i++)
+        {
+            out[leftOut] = 0.0f;
+            out[rightOut] = 0.0f;
+        }
+        return paContinue;
+    }
+
+    if(d->abort)
+    {
+        return paAbort;
+    }
+
     
     for (int i = 0; i < frameCount; i++) {
 
@@ -127,7 +158,8 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
         }
         
     }
-    return 0;
+
+    return paContinue;
 }
 
 void peError(PaError pa_Error)

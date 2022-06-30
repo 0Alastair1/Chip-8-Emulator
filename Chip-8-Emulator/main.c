@@ -3,8 +3,7 @@
 
 int main()
 {
-    initAudio();
-    //startAudio();
+    //initAudio();
     
     p_libsys_init();
     

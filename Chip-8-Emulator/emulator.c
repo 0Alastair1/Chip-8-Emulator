@@ -990,6 +990,47 @@ Uint16* soundTimer;
     SDL_RenderPresent(debugRenderer);
 
 }
+Uint16 delayTimer =0;
+Uint16 soundTimer =0;
+
+PMutex* mutex;
+bool audioPlaying = false;
+void checkAudio()
+{
+    initAudio();
+    startAudio();
+    muteAudio();
+    
+
+    while(true)
+    {
+        if(delayTimer > 0)
+        {
+            p_mutex_lock(mutex);
+            delayTimer--;
+            p_mutex_unlock(mutex);
+        }
+
+        if(soundTimer > 0)
+        {
+            p_mutex_lock(mutex);
+            soundTimer--;
+            p_mutex_unlock(mutex);
+        }
+
+        if(isTrue(soundTimer > 0) && !isTrue(audioPlaying))
+        {
+            unmuteAudio();
+            audioPlaying = true;
+        }
+        else if(isTrue(audioPlaying) && !isTrue(soundTimer > 0))
+        {
+            muteAudio();
+            audioPlaying = false;
+        }
+        SDL_Delay(10); /* fix timing */
+    }
+}
 
 void cpuLoop()
 {
@@ -998,8 +1039,6 @@ void cpuLoop()
     Uint8* memory;
     Uint16 V[16];
     Uint16 stack[32];
-    Uint16 delayTimer =0;
-    Uint16 soundTimer =0;
     Uint16 flags[16];
     
     struct strangeTypeSizes typeSizesStruct = {0, 0, 1, 0, 0}; /* starts in black mode? */
@@ -1037,6 +1076,9 @@ void cpuLoop()
     writeFont();
     TTF_Init();
     efont = TTF_OpenFont("chip8emulatorfont.ttf", 24);
+
+    mutex = p_mutex_new();
+    PUThread* audioThread = p_uthread_create((void*)checkAudio, NULL, true, NULL);
     
     /* create debugger window */
     createDebugWindow();
@@ -1955,7 +1997,9 @@ void cpuLoop()
             {
                 PC += 2;
 
+                p_mutex_lock(mutex);
                 V[x] = delayTimer;
+                p_mutex_unlock(mutex);
             }
 
             /* FX0A  */
@@ -2112,7 +2156,9 @@ void cpuLoop()
             {
                 PC += 2;
 
+                p_mutex_lock(mutex);
                 delayTimer = V[x];
+                p_mutex_unlock(mutex);
             }
 
             /* FX18  */
@@ -2120,7 +2166,9 @@ void cpuLoop()
             {
                 PC += 2;
 
+                p_mutex_lock(mutex);
                 soundTimer = V[x];
+                p_mutex_unlock(mutex);
             }
 
             /* FX1E  */
@@ -2213,14 +2261,14 @@ void cpuLoop()
 
                     if(x < 8)
                     {
-                        memcpy(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                        memcpy(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); /* checkme */
                     }
                 }
                 else if(isTrue(xoChipMode))
                 {
                     PC += 2;
 
-                    memcpy(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                    memcpy(flags, V, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); /* checkme */
                 }
             }
 
@@ -2235,14 +2283,14 @@ void cpuLoop()
 
                     if(x < 8)
                     {
-                        memcpy(V, flags, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                        memcpy(V, flags, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); /* checkme */
                     }
                 }
                 else if(isTrue(xoChipMode))
                 {
                     PC += 2;
 
-                    memcpy(V, flags, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); //checkme
+                    memcpy(V, flags, (x + 1) * (sizeof(V[0])/sizeof(Uint8))); /* checkme */
                 }
 
             }
@@ -2602,18 +2650,6 @@ void cpuLoop()
         }
         SDL_RenderPresent(renderer);
 
-
-
-        /* decrement timers */
-        if(delayTimer > 0)
-        {
-            delayTimer--;
-        }
-
-        if(soundTimer > 0)
-        {
-            soundTimer--;
-        }
         
     }
 
