@@ -22,14 +22,14 @@ struct strangeTypeSizes
 };
 #define I (typeSizesStruct.i)
 
-/* https:/*en.wikipedia.org/wiki/CHIP-8 */
-/* http:/*devernay.free.fr/hacks/chip8/C8TECH10.HTM */
-/* https:/*tobiasvl.github.io/blog/write-a-chip-8-emulator */
-/* http:/*johnearnest.github.io/Octo/docs/SuperChip.html */
-/* https:/*www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/ */
-/* http:/*www.emulator101.com/chip-8-sprites.html */
-/* https:/*github.com/trapexit/chip-8_documentation/blob/master/README.md */
-/* https:/*github.com/JohnEarnest/Octo/blob/gh-pages/docs/XO-ChipSpecification.md */                                              
+/* https://en.wikipedia.org/wiki/CHIP-8 */
+/* http://devernay.free.fr/hacks/chip8/C8TECH10.HTM */
+/* https://tobiasvl.github.io/blog/write-a-chip-8-emulator */
+/* http://johnearnest.github.io/Octo/docs/SuperChip.html */
+/* https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/ */
+/* http://www.emulator101.com/chip-8-sprites.html */
+/* https://github.com/trapexit/chip-8_documentation/blob/master/README.md */
+/* https://github.com/JohnEarnest/Octo/blob/gh-pages/docs/XO-ChipSpecification.md */                                              
 
 
 /* font */
@@ -1364,12 +1364,12 @@ void cpuLoop()
                 mode12864 = true;
             }
             
-            /*
             else if(opcode == 0x0000)
             {
+                /* checkme  */
                 PC += 2;
             }
-            */
+            
 
            /* 0x02A0 - extended  */
             else if(opcode == 0x02A0 && isTrue(chip8XMode))
@@ -2015,7 +2015,7 @@ void cpuLoop()
             {
                 PC += 2;
                 
-                memcpy(&patternBuffer, &memory[I], 16); //CHECKME
+                memcpy(&patternBuffer, &memory[I], 16); /* CHECKME */
                 updateAudioPattern(&patternBuffer);
             }
 

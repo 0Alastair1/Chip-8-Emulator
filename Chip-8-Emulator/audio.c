@@ -91,7 +91,8 @@ void initAudio()
 
 static void updateAudioOutput()
 {
-    for(int i =0; i < 128; i++)
+    int i;
+    for(i =0; i < 128; i++)
     {
         if(**soundData.audioPattern >> i & 1) /* xo uses square wave */
         {
@@ -200,7 +201,8 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
     
     if(d->mute)
     {
-        for(int i = 0; i < frameCount * stereo; i++)
+        int i;
+        for(i = 0; i < frameCount * stereo; i++)
         {
             out[leftOut] = 0.0f;
             out[rightOut] = 0.0f;
@@ -216,7 +218,8 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
     if(!d->xoMode)
     {
         /* construct and output waveform using desired frequency, amplitude and samplerate */
-        for (int i = 0; i < frameCount; i++) {
+        int i;
+        for (i = 0; i < frameCount; i++) {
 
             float dtime = (float)i / sampleRate;
 
@@ -264,8 +267,8 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
 
         /* output the waveform contained in audiopattern 
             at the samplerate calculated from the pitch register converted to our samplerate */
-
-        for (size_t i = 0; i < 128; i++)
+        Uint8 i;
+        for (i = 0; i < 128; i++)
         {
             out[leftOut] = tempOutLeft[i];
             out[rightOut] = tempOutRight[i];
