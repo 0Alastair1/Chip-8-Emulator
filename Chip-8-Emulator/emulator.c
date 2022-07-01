@@ -1040,6 +1040,8 @@ void cpuLoop()
     Uint16 V[16];
     Uint16 stack[32];
     Uint16 flags[16];
+
+    Uint8* patternBuffer = malloc(16);
     
     struct strangeTypeSizes typeSizesStruct = {0, 0, 1, 0, 0}; /* starts in black mode? */
     bool ETI660Mode = false;
@@ -1992,6 +1994,15 @@ void cpuLoop()
                 /* todo later  */
             }
 
+            /* F002 */
+            else if(opcode == 0xF002)
+            {
+                PC += 2;
+                
+                memcpy(&patternBuffer, &memory[I], 16); //CHECKME
+                updateAudioPattern(&patternBuffer);
+            }
+
             /* FX07  */
             else if(numFirst == 0xF && byteLast == 0x07)
             {
@@ -2206,6 +2217,15 @@ void cpuLoop()
                 memory[I] = (V[x] / 100) % 10;
                 memory[I + 1] = (V[x] / 10) % 10;
                 memory[I + 2] = (V[x] / 0x1) % 10;
+
+            }
+
+            /* FX3A  */
+            else if(numFirst == 0xF && byteLast == 0x3A)
+            {
+                PC += 2;
+                
+                changeAudioData(V[x]);
 
             }
 

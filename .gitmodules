@@ -16,3 +16,6 @@
 [submodule "Vendor/plibsys"]
 	path = Vendor/plibsys
 	url = https://github.com/saprykin/plibsys
+[submodule "Vendor/libsamplerate"]
+	path = Vendor/libsamplerate
+	url = https://github.com/libsndfile/libsamplerate

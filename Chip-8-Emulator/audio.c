@@ -14,7 +14,7 @@
 #define rightOut (i * 2 + 1)
 
 const int sampleRate = 44100;
-int bufferSize = 256;
+int bufferSize = 128;
 
 PaStream *stream;
 
@@ -44,6 +44,9 @@ typedef struct{
     waveType wave;
     bool abort;
     bool mute;
+    bool xoMode;
+    float audioPPR;
+    Uint8** audioPattern;
 
 } dataStruct;
 
@@ -52,7 +55,12 @@ dataStruct soundData = {
     b_hz,
     sampleRate,
     1.0f,
-    sineWave
+    sineWave,
+    false,
+    false,
+    false,
+    0.0f,
+    NULL
 };
 
 void initAudio() 
@@ -63,6 +71,7 @@ void initAudio()
         exit(1);
     }
 
+    soundData.xoMode = false;
     soundData.amplitude = 0.08f;
     soundData.wave = squareWave;
 
@@ -97,6 +106,20 @@ void unmuteAudio()
     soundData.mute = false;
 }
 
+void changeAudioData(Uint16 ex)
+{
+    float audioPPR = (float)4000 * (float)(2^((ex-64)/48)); /* xo pitchhz/samplerate/playbackrate */
+}
+
+void updateAudioPattern(Uint8** audioPattern)
+{
+    soundData.audioPattern = audioPattern;
+}
+
+void setXoMode(bool xomode)
+{
+    soundData.xoMode = xomode;
+}
 
 static int callback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags flags, void *data)
 {
@@ -123,40 +146,64 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
         return paAbort;
     }
 
-    
-    for (int i = 0; i < frameCount; i++) {
+    if(!d->xoMode)
+    {
+        for (int i = 0; i < frameCount; i++) {
 
-        float dtime = (float)i / sampleRate;
+            float dtime = (float)i / sampleRate;
 
-        if(d->wave == sineWave)
-        {
-            out[leftOut] = amplitude * sin(frequency_left * (2 * pi) * dtime);
-            out[rightOut] = amplitude * sin(frequency_right * (2 * pi) * dtime);
+            if(d->wave == sineWave)
+            {
+                out[leftOut] = amplitude * sin(frequency_left * (2 * pi) * dtime);
+                out[rightOut] = amplitude * sin(frequency_right * (2 * pi) * dtime);
 
+            }
+            if(d->wave == squareWave)
+            {
+                float temp_left = amplitude * sin(frequency_left * (2 * pi) * dtime);
+                float temp_right = amplitude * sin(frequency_right * (2 * pi) * dtime);
+
+                if(temp_left > 0)
+                {
+                    out[leftOut] = amplitude;
+                }
+                else
+                {
+                    out[leftOut] = -amplitude;
+                }
+                if(temp_right > 0)
+                {
+                    out[rightOut] = amplitude;
+                }
+                else
+                {
+                    out[rightOut] = -amplitude;
+                }
+            }
         }
-        if(d->wave == squareWave)
-        {
-            float temp_left = amplitude * sin(frequency_left * (2 * pi) * dtime);
-            float temp_right = amplitude * sin(frequency_right * (2 * pi) * dtime);
+    }
+    else{
+        /* XO mode audio */
 
-            if(temp_left > 0)
+        if(d->audioPPR == 0)
+        {
+            return paContinue;
+        }
+
+        for(int i =0; i < 128; i++)
+        {
+            if(**d->audioPattern >> i & 1)
             {
                 out[leftOut] = amplitude;
-            }
-            else
-            {
-                out[leftOut] = -amplitude;
-            }
-            if(temp_right > 0)
-            {
                 out[rightOut] = amplitude;
             }
             else
             {
+                out[leftOut] = -amplitude;
                 out[rightOut] = -amplitude;
             }
+            
         }
-        
     }
 
     return paContinue;
