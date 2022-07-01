@@ -1994,6 +1994,22 @@ void cpuLoop()
                 /* todo later  */
             }
 
+            /* F000 */
+            else if(opcode == 0xF000)
+            {
+                PC += 2;
+
+                I = *(Uint16*)&memory[PC];
+                PC += 2;
+            }
+
+            /* FX01  */
+            else if(numFirst == 0xF && byteLast == 0x1)
+            {
+                PC += 2;
+                /* todo later  */
+            }
+
             /* F002 */
             else if(opcode == 0xF002)
             {
