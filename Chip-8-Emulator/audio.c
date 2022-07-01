@@ -1,6 +1,7 @@
 #include <main.h>
 #include <portaudio.h>
 #include <math.h>
+#include <samplerate.h>
 
 #define a_hz 440.0f
 #define b_hz 880.0f
@@ -14,9 +15,12 @@
 #define rightOut (i * 2 + 1)
 
 const int sampleRate = 44100;
-int bufferSize = 128;
+int bufferSize = 128; /* xomode uses 128 samples (16bytes) per frame */
 
 PaStream *stream;
+
+float* tempOutLeft;
+float* tempOutRight;
 
 #define pi (double)3.14159265358979323846
 
@@ -71,12 +75,64 @@ void initAudio()
         exit(1);
     }
 
+    tempOutLeft = (float*)malloc(sizeof(float) * bufferSize);
+    tempOutRight = (float*)malloc(sizeof(float) * bufferSize);
+
     soundData.xoMode = false;
     soundData.amplitude = 0.08f;
     soundData.wave = squareWave;
 
     pa_Error = Pa_OpenDefaultStream(&stream, 0, stereo, paFloat32, sampleRate, bufferSize, callback, &soundData);
     peError(pa_Error);
+    
+
+    return;
+}
+
+static void updateAudioOutput()
+{
+    for(int i =0; i < 128; i++)
+    {
+        if(**soundData.audioPattern >> i & 1) /* xo uses square wave */
+        {
+            tempOutLeft[i] = soundData.amplitude;
+            tempOutRight[i] = soundData.amplitude;
+        }
+        else
+        {
+            tempOutLeft[i] = 0.0f;
+            tempOutRight[i] = 0.0f;
+        }
+    }
+    /* recalculate samplerate conversion */
+    /* recalculate samplerate from audioPPR to sampleRate using wave from tempOutLeft and tempOutRight */
+
+    SRC_DATA srcData;
+    srcData.data_in = tempOutLeft;
+    srcData.data_out = tempOutLeft;
+    srcData.input_frames = bufferSize;
+    srcData.output_frames = bufferSize;
+    srcData.src_ratio = sampleRate / soundData.audioPPR;
+
+    int error = src_simple(&srcData, SRC_SINC_MEDIUM_QUALITY, SRC_LINEAR);
+    if(error)
+    {
+        printf("error: %s\n", src_strerror(error));
+        exit(1);
+    }
+
+    srcData.data_in = tempOutRight;
+    srcData.data_out = tempOutRight;
+    srcData.input_frames = bufferSize;
+    srcData.output_frames = bufferSize;
+    srcData.src_ratio = sampleRate / soundData.audioPPR;
+
+    error = src_simple(&srcData, SRC_SINC_MEDIUM_QUALITY, SRC_LINEAR);
+    if(error)
+    {
+        printf("error: %s\n", src_strerror(error));
+        exit(1);
+    }
 
     return;
 }
@@ -108,12 +164,23 @@ void unmuteAudio()
 
 void changeAudioData(Uint16 ex)
 {
+    muteAudio();
+
     float audioPPR = (float)4000 * (float)(2^((ex-64)/48)); /* xo pitchhz/samplerate/playbackrate */
+    soundData.audioPPR = audioPPR;
+    updateAudioOutput();
+
+    unmuteAudio();
 }
 
 void updateAudioPattern(Uint8** audioPattern)
 {
+    muteAudio();
+
     soundData.audioPattern = audioPattern;
+    updateAudioOutput();
+
+    unmuteAudio();
 }
 
 void setXoMode(bool xomode)
@@ -148,20 +215,25 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
 
     if(!d->xoMode)
     {
+        /* construct and output waveform using desired frequency, amplitude and samplerate */
         for (int i = 0; i < frameCount; i++) {
 
             float dtime = (float)i / sampleRate;
 
+            float angleLeft = 2.0f * pi * frequency_left;
+            float angleRight = 2.0f * pi * frequency_right;
+
+
             if(d->wave == sineWave)
             {
-                out[leftOut] = amplitude * sin(frequency_left * (2 * pi) * dtime);
-                out[rightOut] = amplitude * sin(frequency_right * (2 * pi) * dtime);
+                out[leftOut] = amplitude * sin(angleLeft * dtime);
+                out[rightOut] = amplitude * sin(angleRight * dtime);
 
             }
             if(d->wave == squareWave)
             {
-                float temp_left = amplitude * sin(frequency_left * (2 * pi) * dtime);
-                float temp_right = amplitude * sin(frequency_right * (2 * pi) * dtime);
+                float temp_left = amplitude * sin(angleLeft * dtime);
+                float temp_right = amplitude * sin(angleRight * dtime);
 
                 if(temp_left > 0)
                 {
@@ -190,20 +262,15 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
             return paContinue;
         }
 
-        for(int i =0; i < 128; i++)
+        /* output the waveform contained in audiopattern 
+            at the samplerate calculated from the pitch register converted to our samplerate */
+
+        for (size_t i = 0; i < 128; i++)
         {
-            if(**d->audioPattern >> i & 1)
-            {
-                out[leftOut] = amplitude;
-                out[rightOut] = amplitude;
-            }
-            else
-            {
-                out[leftOut] = -amplitude;
-                out[rightOut] = -amplitude;
-            }
-            
+            out[leftOut] = tempOutLeft[i];
+            out[rightOut] = tempOutRight[i];
         }
+        
     }
 
     return paContinue;
