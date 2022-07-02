@@ -2,6 +2,8 @@
 #include <portaudio.h>
 #include <math.h>
 #include <samplerate.h>
+#include <stdatomic.h>
+#include <patomic.h>
 
 #define a_hz 440.0f
 #define b_hz 880.0f
@@ -44,15 +46,15 @@ typedef enum {
 
 typedef struct{
 
-    float frequency_left;
-    float frequency_right;
-    float sampleRate;
-    float amplitude;
-    waveType wave;
-    bool abort;
-    bool mute;
-    bool xoMode;
-    float audioPPR;
+    _Atomic float frequency_left;
+    _Atomic float frequency_right;
+    _Atomic float sampleRate;
+    _Atomic float amplitude;
+    _Atomic waveType wave;
+    _Atomic bool abort;
+    _Atomic bool mute;
+    _Atomic bool xoMode;
+    _Atomic float audioPPR;
     Uint8** audioPattern;
 
 } dataStruct;
@@ -75,6 +77,12 @@ void initAudio()
     PaError pa_Error = Pa_Initialize();
     if (pa_Error != paNoError) {
         printf("PortAudio error: %s\n", Pa_GetErrorText(pa_Error));
+        exit(1);
+    }
+
+    if(p_atomic_is_lock_free() == FALSE)
+    {
+        printf("compiler doesn't support lock free atomics\n");
         exit(1);
     }
 
@@ -211,6 +219,11 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
     float frequency_right = d->frequency_right;
     float sampleRate = d->sampleRate;
     float amplitude = d->amplitude;
+    waveType wave = d->wave;
+    bool abort = d->abort;
+    bool mute = d->mute;
+    bool xoMode = d->xoMode;
+    float audioPPR = d->audioPPR;
     
     if(d->mute)
     {
@@ -223,12 +236,12 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
         return paContinue;
     }
 
-    if(d->abort)
+    if(abort)
     {
         return paAbort;
     }
 
-    if(!d->xoMode)
+    if(!xoMode)
     {
         /* construct and output waveform using desired frequency, amplitude and samplerate */
         int i;
@@ -273,7 +286,7 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
     else{
         /* XO mode audio */
 
-        if(d->audioPPR == 0)
+        if(audioPPR == 0)
         {
             return paContinue;
         }

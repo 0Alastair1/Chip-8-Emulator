@@ -23,7 +23,7 @@ target_link_libraries(Chip-8-Emulator PortAudio)
 target_link_libraries(Chip-8-Emulator plibsysstatic)
 target_link_libraries(Chip-8-Emulator samplerate)
 
-#use c11 for atomics
+#use c11 for atomics and inline
 set_target_properties(Chip-8-Emulator PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
 set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 11)
 target_compile_features(Chip-8-Emulator PUBLIC c_std_11)
