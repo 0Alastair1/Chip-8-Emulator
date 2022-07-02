@@ -1,10 +1,7 @@
-#include <cstdint>
-#include <audio.hpp>
+#include <main.h>
 #include <portaudio.h>
 #include <math.h>
 #include <samplerate.h>
-#include <cstdlib>
-#include <cstdio>
 
 #define a_hz 440.0f
 #define b_hz 880.0f
@@ -56,7 +53,7 @@ typedef struct{
     bool mute;
     bool xoMode;
     float audioPPR;
-    uint8_t** audioPattern;
+    Uint8** audioPattern;
 
 } dataStruct;
 
@@ -162,6 +159,7 @@ void stopAudio()
 
 void muteAudio()
 {
+    printf("mute\n");
     soundData.mute = true;
 }
 
@@ -170,7 +168,7 @@ void unmuteAudio()
     soundData.mute = false;
 }
 
-void changeAudioData(uint16_t ex)
+void changeAudioData(Uint16 ex)
 {
     bool mutePush = soundData.mute;
     if(soundData.mute == false)
@@ -185,7 +183,7 @@ void changeAudioData(uint16_t ex)
     soundData.mute = mutePush;
 }
 
-void updateAudioPattern(uint8_t** audioPattern)
+void updateAudioPattern(Uint8** audioPattern)
 {
     bool mutePush = soundData.mute;
     if(soundData.mute == false)
@@ -282,7 +280,7 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
 
         /* output the waveform contained in audiopattern 
             at the samplerate calculated from the pitch register converted to our samplerate */
-        uint8_t i;
+        Uint8 i;
         for (i = 0; i < 128; i++)
         {
             out[leftOut] = tempOutLeft[i];

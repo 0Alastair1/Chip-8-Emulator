@@ -95,4 +95,11 @@ void writeFont();
 
 void cpuLoop();
 
-
+void initAudio();
+void startAudio();
+void closeAudio();
+void muteAudio();
+void unmuteAudio();
+void changeAudioData(Uint16 ex);
+void updateAudioPattern(Uint8** audioPattern);
+static void updateAudioOutput();
