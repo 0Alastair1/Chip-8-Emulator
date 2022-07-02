@@ -2,6 +2,8 @@
 #include <portaudio.h>
 #include <math.h>
 #include <samplerate.h>
+
+/* check me - should use C++ atomics?, stdatomics?, patomics? which are lock free?*/
 #include <stdatomic.h>
 #include <patomic.h>
 
@@ -81,13 +83,18 @@ void initAudio()
     }
 
     if(p_atomic_is_lock_free() == FALSE)
-    {
+    { /* does this apply to c standard atomics? */
         printf("compiler doesn't support lock free atomics\n");
         exit(1);
     }
 
+    /*
     tempOutLeft = (float*)malloc(sizeof(float) * bufferSize);
     tempOutRight = (float*)malloc(sizeof(float) * bufferSize);
+    */
+   /* check me */
+    tempOutLeft = (float*)alloca(sizeof(float) * bufferSize);
+    tempOutRight = (float*)alloca(sizeof(float) * bufferSize);
 
     soundData.xoMode = false;
     soundData.amplitude = 0.08f;
@@ -225,7 +232,7 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
     bool xoMode = d->xoMode;
     float audioPPR = d->audioPPR;
     
-    if(d->mute)
+    if(mute)
     {
         int i;
         for(i = 0; i < frameCount * stereo; i++)
@@ -253,13 +260,13 @@ static int callback(const void *input, void *output, unsigned long frameCount, c
             float angleRight = 2.0f * pi * frequency_right;
 
 
-            if(d->wave == sineWave)
+            if(wave == sineWave)
             {
                 out[leftOut] = amplitude * sin(angleLeft * dtime);
                 out[rightOut] = amplitude * sin(angleRight * dtime);
 
             }
-            if(d->wave == squareWave)
+            if(wave == squareWave)
             {
                 float temp_left = amplitude * sin(angleLeft * dtime);
                 float temp_right = amplitude * sin(angleRight * dtime);
