@@ -20,5 +20,5 @@ target_link_libraries(Chip-8-Emulator PortAudio)
 target_link_libraries(Chip-8-Emulator plibsysstatic)
 target_link_libraries(Chip-8-Emulator samplerate)
 
-set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 11)
-set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD_REQUIRED ON)
+set_target_properties(Chip-8-Emulator PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
+target_compile_features(Chip-8-Emulator PUBLIC c_std_11)
