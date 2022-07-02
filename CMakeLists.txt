@@ -36,8 +36,8 @@ set_target_properties(samplerate PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
 set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 11)
 set_property(TARGET SDL2-static PROPERTY C_STANDARD 11)
 set_property(TARGET SDL2_ttf PROPERTY C_STANDARD 11)
-set_property(TARGET PortAudio PROPERTY C_STANDARD 11)
-#set_property(TARGET plibsysstatic PROPERTY C_STANDARD 11)
+#set_property(TARGET PortAudio PROPERTY C_STANDARD 11)
+set_property(TARGET plibsysstatic PROPERTY C_STANDARD 11)
 set_property(TARGET samplerate PROPERTY C_STANDARD 11)
 
 
