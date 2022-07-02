@@ -11,8 +11,11 @@
 #define f_hz 2640.0f
 #define g_hz 3080.0f
 
-#define leftOut (i * 2)
-#define rightOut (i * 2 + 1)
+//#define leftOut (i * 2)
+//#define rightOut (i * 2 + 1)
+
+#define leftOut (i)
+#define rightOut (i + 1)
 
 const int sampleRate = 44100;
 int bufferSize = 128; /* xomode uses 128 samples (16bytes) per frame */
@@ -115,6 +118,7 @@ static void updateAudioOutput()
     srcData.output_frames = bufferSize;
     srcData.src_ratio = sampleRate / soundData.audioPPR;
 
+    /* using src_simple as audiopattern is the full audio buffer */
     int error = src_simple(&srcData, SRC_SINC_MEDIUM_QUALITY, SRC_LINEAR);
     if(error)
     {
@@ -165,23 +169,31 @@ void unmuteAudio()
 
 void changeAudioData(Uint16 ex)
 {
-    muteAudio();
+    bool mutePush = soundData.mute;
+    if(soundData.mute == false)
+    {
+        muteAudio();
+    }
 
     float audioPPR = (float)4000 * (float)(2^((ex-64)/48)); /* xo pitchhz/samplerate/playbackrate */
     soundData.audioPPR = audioPPR;
     updateAudioOutput();
 
-    unmuteAudio();
+    soundData.mute = mutePush;
 }
 
 void updateAudioPattern(Uint8** audioPattern)
 {
-    muteAudio();
+    bool mutePush = soundData.mute;
+    if(soundData.mute == false)
+    {
+        muteAudio();
+    }
 
     soundData.audioPattern = audioPattern;
     updateAudioOutput();
 
-    unmuteAudio();
+    soundData.mute = mutePush;
 }
 
 void setXoMode(bool xomode)
