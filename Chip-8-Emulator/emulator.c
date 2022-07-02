@@ -1,6 +1,6 @@
 
 #include <main.h>
-
+#include <audio.hpp>
 
 static bool isLittleEndian()
 {
