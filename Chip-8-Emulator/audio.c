@@ -174,7 +174,6 @@ void stopAudio()
 
 void muteAudio()
 {
-    printf("mute\n");
     soundData.mute = true;
 }
 
