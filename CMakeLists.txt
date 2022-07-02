@@ -25,23 +25,19 @@ target_link_libraries(Chip-8-Emulator PortAudio)
 target_link_libraries(Chip-8-Emulator plibsysstatic)
 target_link_libraries(Chip-8-Emulator samplerate)
 
+#use c11 for atomics
 set_target_properties(Chip-8-Emulator PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
+set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 11)
+target_compile_features(Chip-8-Emulator PUBLIC c_std_11)
+
+#set std 11 for all other projects to prevent potential linker errors
 set_target_properties(SDL2-static PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
 set_target_properties(SDL2_ttf PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
 #set_target_properties(PortAudio PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
+set_target_properties(PortAudio PROPERTIES C_EXTENSIONS OFF)
 set_target_properties(plibsysstatic PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
 set_target_properties(samplerate PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
 
-
-set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 11)
-set_property(TARGET SDL2-static PROPERTY C_STANDARD 11)
-set_property(TARGET SDL2_ttf PROPERTY C_STANDARD 11)
-#set_property(TARGET PortAudio PROPERTY C_STANDARD 11)
-set_property(TARGET plibsysstatic PROPERTY C_STANDARD 11)
-set_property(TARGET samplerate PROPERTY C_STANDARD 11)
-
-
-target_compile_features(Chip-8-Emulator PUBLIC c_std_11)
 target_compile_features(SDL2-static PUBLIC c_std_11)
 target_compile_features(SDL2_ttf PUBLIC c_std_11)
 #target_compile_features(PortAudio PUBLIC c_std_11)

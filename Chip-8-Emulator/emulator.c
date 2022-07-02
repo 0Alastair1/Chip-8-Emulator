@@ -2,7 +2,7 @@
 #include <main.h>
 
 
-static bool isLittleEndian()
+static inline bool isLittleEndian()
 {
     Uint16 val = 0xFF00;
     return *(Uint8*)&val == 0xFF;
@@ -127,9 +127,7 @@ void createDebugWindow()
     debugRenderer = SDL_CreateRenderer(debugWindow, -1, SDL_RENDERER_ACCELERATED);
 }
 
-void initSDL(window, renderer)
-SDL_Window** window;
-SDL_Renderer** renderer;
+void initSDL(SDL_Window** window, SDL_Renderer** renderer)
 {
     SDL_Init(SDL_INIT_VIDEO);
     *window = SDL_CreateWindow("Chip-8 Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_s * scale, height_s * scale, SDL_WINDOW_SHOWN);
@@ -145,16 +143,7 @@ SDL_Renderer** renderer;
 Uint8* data;
 uint32_t size;
 
-void startingUi(window, renderer, sChip8Mode, xoChipMode, chip8HdMode, chip10Mode, chip8IMode, chip8EMode, chip8XMode)
-SDL_Window* window;
-SDL_Renderer* renderer;
-bool* sChip8Mode;
-bool* xoChipMode;
-bool* chip8HdMode;
-bool* chip10Mode;
-bool* chip8IMode;
-bool* chip8EMode;
-bool* chip8XMode;
+void startingUi(SDL_Window* window,SDL_Renderer* renderer,bool* sChip8Mode,bool* xoChipMode,bool* chip8HdMode,bool* chip10Mode,bool* chip8IMode,bool* chip8EMode,bool* chip8XMode)
 {
 
     int width = width_s * scale;
@@ -835,15 +824,7 @@ SDL_Texture* SPTexture;
 SDL_Texture* iRegTexture;
 SDL_Texture* VSTexture[16];
 
-static void updateDebugWindow(PC, SP, iReg, memory, V, stack, delayTimer, soundTimer)
-Uint16* PC;
-Uint8* SP;
-Uint16* iReg;
-Uint8* memory;
-Uint16* V;
-Uint16* stack;
-Uint8* delayTimer;
-Uint16* soundTimer;
+static void updateDebugWindow(Uint16* PC,Uint8* SP,Uint16* iReg,Uint8* memory,Uint16* V,Uint16* stack,Uint8* delayTimer,Uint16* soundTimer)
 {
 
 

@@ -23,8 +23,7 @@ char* openFile()
     return filepath;
 }
 
-struct file readFile(filepath)
-char* filepath;
+struct file readFile(char* filepath)
 {
     struct file file;
     FILE* fp;
