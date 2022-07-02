@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
 
+#set(CMAKE_C_STANDARD 11)
+#set(c_std_11)
+set(CMAKE_C_EXTENSIONS OFF)
+set(C_EXTENSIONS OFF)
+
 project(Chip-8-Emulator)
 
 set(BUILD_SHARED_LIBS OFF)
@@ -21,4 +26,7 @@ target_link_libraries(Chip-8-Emulator plibsysstatic)
 target_link_libraries(Chip-8-Emulator samplerate)
 
 set_target_properties(Chip-8-Emulator PROPERTIES C_STANDARD 11 C_EXTENSIONS OFF)
+
+set_property(TARGET Chip-8-Emulator PROPERTY C_STANDARD 11)
+
 target_compile_features(Chip-8-Emulator PUBLIC c_std_11)
